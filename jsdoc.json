@@ -1,0 +1,18 @@
+{
+  "source": {
+    "include": ["src/index.js", "src/multisig.js"]
+  },
+  "opts": {
+    "destination": "./web/doc/",
+    "recurse": true,
+    "readme": "README.md"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "template": {
+    "default": {
+      "includeDate": false
+    }
+  }
+}
