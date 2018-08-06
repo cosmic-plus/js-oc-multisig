@@ -16,28 +16,42 @@ const helpers = require('./helpers')
  * network.
  *
  */
-resolve.network = function (c, network = c.network, server = c.server) {
-  switch (network) {
-    case 'test':
-      StellarSdk.Network.useTestNetwork()
-      if (!server) server = testServer
-      break
-    case 'public':
-      StellarSdk.Network.usePublicNetwork()
-      if (!server) server = publicServer
-      break
-    default: throw new Error('Invalid network: ' + network)
+resolve.network = function (conf, network = conf.network, server = conf.server) {
+  const currentNetwork = StellarSdk.Network.current()
+  let passphrase = currentNetwork && currentNetwork.networkPassphrase()
+
+  if (network) {
+    let newPassphrase
+    if (network === 'public') newPassphrase = StellarSdk.Networks.PUBLIC
+    else if (network === 'test') newPassphrase = StellarSdk.Networks.TESTNET
+    else newPassphrase = network
+
+    if (passphrase !== newPassphrase) {
+      console.log('Switch to network: ' + network)
+      StellarSdk.Network.use(new StellarSdk.Network(newPassphrase))
+      passphrase = newPassphrase
+    }
+  } else if (!passphrase) {
+    throw new Error('No selected network')
   }
 
-  if (server instanceof StellarSdk.Server) c.server = server
-  else if (typeof server === 'string') c.server = new StellarSdk.Server(server)
-  else throw new TypeError('Invalid server: ' + server)
-
-  return c.server
+  return getServer(passphrase, server)
 }
 
-const testServer = new StellarSdk.Server('https://horizon-testnet.stellar.org')
-const publicServer = new StellarSdk.Server('https://horizon.stellar.org')
+const serverSaves = {}
+const networkDefaultServer = {}
+function getServer (passphrase, url) {
+  if (url) networkDefaultServer[passphrase] = url
+  else url = networkDefaultServer[passphrase]
+  if (!url) throw new Error('No default server for requested network.')
+
+  if (!serverSaves[url]) serverSaves[url] = new StellarSdk.Server(url)
+  return serverSaves[url]
+}
+
+/// Save defaults horizon nodes.
+getServer(StellarSdk.Networks.PUBLIC, 'https://horizon.stellar.org')
+getServer(StellarSdk.Networks.TESTNET, 'https://horizon-testnet.stellar.org')
 
 /**
  * Configure for how much time the resolved addresses are kept in cache,
@@ -94,23 +108,18 @@ resolve.address = function (c, address) {
  * @param {string} address
  */
 async function addressResolver (c, address) {
-  if (address.length !== 56 && !address.match(/.*\*.*\..*/)) {
-    throw new Error('Invalid address: ' + helpers.shorter(address))
-  }
+  // if (address.length !== 56 && !address.match(/.*\*.*\..*/)) {
+  // throw new Error('Invalid address: ' + helpers.shorter(address))
+  // }
 
-  try {
-    const account = await StellarSdk.FederationServer.resolve(address)
-    const publicKey = account.account_id
-    if (!publicKey) throw new Error('Empty account')
-    if (!account.memo_type && account.memo !== undefined) delete account.memo
-    if (address !== publicKey) account.address = address
-    const alias = c.aliases && c.aliases[publicKey]
-    if (alias) account.alias = alias
-    return account
-  } catch (error) {
-    console.error(error)
-    throw new Error("Can't resolve: " + helpers.shorter(address))
-  }
+  const account = await StellarSdk.FederationServer.resolve(address)
+  const publicKey = account.account_id
+  if (!publicKey) throw new Error('Invalid response from federation server.')
+  if (!account.memo_type && account.memo !== undefined) delete account.memo
+  if (address !== publicKey) account.address = address
+  const alias = c.aliases && c.aliases[publicKey]
+  if (alias) account.alias = alias
+  return account
 }
 
 /**
@@ -125,14 +134,23 @@ resolve.account = async function (c, address, network = c.network) {
   const server = resolve.network(c, network)
   const account = await resolve.address(c, address)
   const publicKey = account.account_id
-  try {
-    const accountResponse = await server.loadAccount(publicKey)
-    return accountResponse
-  } catch (error) {
-    console.error(error)
-    const short = helpers.shorter(address)
-    throw new Error(`Empty account: ${short}`)
-  }
+  // try {
+  const accountResponse = await server.loadAccount(publicKey)
+  return accountResponse
+  // } catch (error) {
+  // console.error(error)
+  // const short = helpers.shorter(address)
+  // throw new Error(`Empty account: ${short}`)
+  // }
+}
+
+resolve.accountIsEmpty = async function (conf, id) {
+  // const server = resolve.network(conf)
+  // const account = await resolve.address(conf, id)
+  // const caller = server.accounts()
+  // const data = await caller.accountId(account.account_id).call()
+  // console.log(data)
+  return resolve.account(conf, id).then(x => false).catch(x => true)
 }
 
 resolve.transaction = async function (conf, txHash) {

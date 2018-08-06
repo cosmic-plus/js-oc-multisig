@@ -1,15 +1,20 @@
 # js-stellar-oc-multisig
 
 **Stellar On-chain Multisignatures** is a JavaScript library that enable
-storing/retrieving signatures from the Stellar blockchain.
+storing/retrieving signatures on the Stellar blockchain.
 
 Stellar blockchain offers on-chain advanced setups for multi-signature
 accounts and smart-contracts. This is great because it makes it robust and
-secure. However, the signatures collection is not part of it and have to happens
-off-chain.
+secure. However, the signatures collection is not part of it.
 
 Some smart-contracts and account security models may require that signature 
 collection happens on the public ledger. This library implements a way to do so.
+By default, the signatures are stored on the test network. However, it is
+possible to set it up to use public network or any custom network as well.
+
+Once on-chain signature collection is enabled on an account, it may be used each
+from each transaction whose this account is the source. All legit signers for
+this transaction can send any legit signature they have.
 
 *Disclaimer:* This library is made independently from the Stellar Foundation.
 
@@ -27,7 +32,7 @@ discussion](https://galactictalk.org/d/1436-on-chain-signature-collection).
 Stellar Foundation may actually patch their software in a way that may prevent 
 this library to work.
 
-If oc-multisig gets the greenlight the beta release would be announced
+If oc-multisig gets the greenlight the beta release will be announced
 on [Galactic Talk](https://galactictalk.com).
 
 ## Install
@@ -73,51 +78,38 @@ Note: For production release it is advised to serve your own copy of the librari
 
 ## Get started
 
-### Configuration
-
-```js
-/// Those are the default for the alpha release
-multisig.network = 'test'
-multisig.server = 'https://horizon-testnet.stellar.org'
-```
-
 ### Enable on-chain signature collection on an account
 
 ```js
+multisig.enable(keypair, ...options)
+  .then(function(response) { // Horizon response or null if already enabled
+    console.log('On-chain signature collection is enabled!')
+  }).catch(console.error)
+
+// To collect signatures on testnet:
 multisig.enable(keypair)
-  .then(function(response) { console.log('On-chain signature collection enabled!')})
-  .catch(console.error)
+
+// To collect signatures on publicnet:
+multisig.enable(keypair, { network: 'public' })
+
+// To collect signatures on a custom network:
+multisig.enable(keypair, { network: 'network_passphrase', server: 'horizon_url' })
 ```
 
-Note: You can also pass a *publicKey*, an *AccountResponse* or a federated address
-to `multisig.enable`. In this case, the returned *Promise* will resolve to a
-*Transaction* that enable on-chain signature collection for the given account.
 
 ### Disable on-chain signature collection on an account
 
 ```js
 multisig.disable(keypair)
-  .then(function(response) { console.log('On-chain signature collection disabled!')})
-  .catch(console.error)
-```
-
-Note: You can also pass a *publicKey*, an *AccountResponse* or a federated address
-to `multisig.disable`. In this case, the returned *Promise* will resolve to a
-*Transaction* that disable on-chain signature collection for the given account.
-
-### Get oc-multisig configuration
-
-```js
-multisig.config(address|publicKey|AccountResponse)
-  .then(function(obj) {
-    console.log(obj)
+  .then(function(response) { /// Horizon response or null if already disabled
+    console.log('On-chain signature collection disabled!')
   }).catch(console.error)
 ```
 
-### Test is oc-multisig is enabled
+### Test if oc-multisig is enabled
 
 ```js
-multisig.isEnabled(address|publicKey|AccountResponse)
+multisig.isEnabled(address|publicKey|keypair|AccountResponse)
   .then(function (bool) {
     if (bool) console.log('On-chain signature collection is enabled.')
     else console.log('On-chain signature collection is disabled.')
@@ -138,17 +130,12 @@ multisig.pushSignatures(transaction, keypair)
   }).catch(console.error)
 ```
 
-Note: You can also pass a *publicKey*, an *AccountResponse* or a federated 
-address to `multisig.pushSignatures`. In that case, the returned *Promise* will 
-resolve to a *Transaction* that sends the new signatures to the blockchain, or 
-to `null` if there's no new signatures.
-
 ### Pull signatures from the blockchain
 
-This will add any missing signature found on the blockchain to `transaction`.
-Note that only legit signatures shared by legit signers are fetch. The *Promise*
-returned by this method is a *boolean* that resolves to `true` when new
-signatures were fetched, and to `false` otherwise.
+This will get signature found on the blockchain to `transaction`. Note that 
+only legit signatures shared by legit signers are fetch. The *Promise* returned 
+by this method resolves to a *boolean* that is `true` when new signatures were 
+fetched, `false` otherwise.
 
 ```js
 multisig.pullSignatures(transaction)
@@ -157,5 +144,62 @@ multisig.pullSignatures(transaction)
     else console.log('No new signature to download.')
   }).catch(console.error)
 ```
+
+## Account configuration
+
+The account configuration is stored as account entries on the blockchain. In 
+the library, it is represented as an object:
+
+```
+{
+  // The side-account ID were signatures are sent. By default this is randomly
+  // chosen.
+  id: G..., 
+
+  // The network on which the signatures are sent. It is test by default.
+  // You can store signatures on a different network than the account you're using.
+  network: test|public|passphrase, 
+
+  // The url of the horizon node to use. Stellar Foundation nodes are used by
+  // default, in which case this value stay 'undefined'.
+  server: https....
+}
+```
+
+### Get account configuration
+
+```js
+multisig.config(address|publicKey|keypair|AccountResponse)
+  .then(function(obj) {
+    console.log(obj)
+  }).catch(console.error)
+```
+
+### Change account configuration
+
+```js
+multisig.setup(keypair, { network: ..., server: ..., id: ...})
+  .then(function (response) { /// Horizon response or null if no change was needed.
+    if (response) console.log('On-chain signature collection setup updated!')
+    else console.log('Nothing to change.')
+  }).catch(console.error)
+```
+
+## Use a custom network
+
+By default, oc-multisig use the same network than StellarSdk. It will use 
+Stellar Foundation horizon nodes ('https://horizon.stellar.org' and 
+'https://horizon-testnet.stellar.org') for public and test network. If your
+account is on a custom network, or if you want to use a different horizon node, 
+you'll have to declare it:
+
+```js
+/// Will returns the server object for 'horizon_url'
+const server = multisig.useNetwork(public|test|passphrase, horizon_url)
+```
+
+This method will switch to the declared network, so you don't need to use 
+StellarSdk.Network.use() on top of that.
+
 
 ## That's all Folks !

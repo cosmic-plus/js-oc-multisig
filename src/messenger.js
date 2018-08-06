@@ -26,7 +26,7 @@ const resolve = require('./resolve')
  * @param {String} message The message to be send.
  * @return {Transaction} A StellarSdk Transaction object
  */
-messenger.sendTx = function (sender, destination, memo, message) {
+messenger.sendTx = async function (conf, sender, destination, memo, message) {
   if (!memo) memo = new StellarSdk.Memo('none')
   if (!message) message = ''
   if (typeof memo === 'string') {
@@ -41,14 +41,24 @@ messenger.sendTx = function (sender, destination, memo, message) {
   const txBuilder = new StellarSdk.TransactionBuilder(sender)
 
   txBuilder.addMemo(memo)
-  if (typeof destination !== 'array') destination = [ destination ]
-  destination.forEach(entry => {
-    txBuilder.addOperation(StellarSdk.Operation.payment({
-      destination: entry,
-      asset: StellarSdk.Asset.native(),
-      amount: '0.0000001'
-    }))
-  })
+
+  /// Create destinations on-the-fly when needed.
+  if (!Array.isArray(destination)) destination = [ destination ]
+  for (let index in destination) {
+    const entry = destination[index]
+    if (await resolve.accountIsEmpty(conf, entry)) {
+      txBuilder.addOperation(StellarSdk.Operation.createAccount({
+        destination: entry,
+        startingBalance: '1'
+      }))
+    } else {
+      txBuilder.addOperation(StellarSdk.Operation.payment({
+        destination: entry,
+        asset: StellarSdk.Asset.native(),
+        amount: '0.0000001'
+      }))
+    }
+  }
 
   if (!(message instanceof Buffer)) message = Buffer.from(message)
   const opNum = 100 - destination.length
@@ -74,8 +84,8 @@ messenger.sendTx = function (sender, destination, memo, message) {
  *     `message` fields.
  */
 messenger.read = async function (conf, txHash) {
-  resolve.network(conf)
-  const caller = conf.server.transactions()
+  const server = resolve.network(conf)
+  const caller = server.transactions()
   const answer = await caller.transaction(txHash).call()
   return {
     sender: answer.source_account,
@@ -103,8 +113,8 @@ function extractMessage (txCallAnswer) {
 }
 
 messenger.list = function (conf, publicKey, limit) {
-  resolve.network(conf)
-  const caller = conf.server.transactions().forAccount(publicKey).limit(200)
+  const server = resolve.network(conf)
+  const caller = server.transactions().forAccount(publicKey).limit(200)
   return _listPromiseLoop(caller.call(), limit)
 }
 
@@ -125,8 +135,8 @@ messenger.find = function (conf, publicKey, func) {
 }
 
 messenger.filter = function (conf, publicKey, func, limit) {
-  resolve.network(conf)
-  const caller = conf.server.transactions().forAccount(publicKey).limit(200)
+  const server = resolve.network(conf)
+  const caller = server.transactions().forAccount(publicKey).limit(200)
   return _filterPromiseLoop(caller.call(), func, limit)
 }
 
