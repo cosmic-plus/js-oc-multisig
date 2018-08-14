@@ -8,10 +8,10 @@
     "get": "git submodule update -i --recursive",
     "format": "standard --fix 'src/**.js'",
     "build-doc": "jsdoc -c jsdoc.json",
-    "build-misc": "cp AUTHORS LICENSE README.md web",
+    "build-misc": "cp AUTHORS LICENSE README.md package-lock.json web",
     "build-js": "webpack -p",
     "build": "for i in js misc; do npm run build-$i || return; done",
-    "check": "npm ci && npm run get && npm run build && cd web && git status",
+    "check": "npm run get && cp web/package-lock.json . && npm ci && npm run build && cd web && git status",
     "watch": "webpack -d --watch"
   },
   "keywords": [
