@@ -223,6 +223,6 @@ async function getTxSignersList (conf, transaction) {
 
 const extraField = 'extra_ocmultisig'
 function useExtra (obj) {
-  if (!obj.extra) obj[extraField] = {}
+  if (!obj[extraField]) obj[extraField] = {}
   return obj[extraField]
 }
