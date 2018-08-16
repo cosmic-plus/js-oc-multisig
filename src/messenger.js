@@ -7,6 +7,7 @@
 const messenger = exports
 
 const Buffer = require('./buffer')
+const loopCall = require('./loopcall')
 const resolve = require('./resolve')
 
 /**
@@ -112,43 +113,13 @@ function extractMessage (txCallAnswer) {
   return Buffer.concat(array)
 }
 
-messenger.list = function (conf, publicKey, limit) {
+messenger.list = function (conf, publicKey, options) {
   const server = resolve.network(conf)
-  const caller = server.transactions().forAccount(publicKey).limit(200)
-  return _listPromiseLoop(caller.call(), limit)
+  const callBuilder = server.transactions().forAccount(publicKey)
+  return loopCall(callBuilder, options)
 }
 
-async function _listPromiseLoop (answerPromise, limit, array) {
-  if (!array) array = []
-  const answer = await answerPromise
-
-  if (answer.records.length === 0) return array
-  if (limit && array.length + answer.records.length > limit) {
-    return array.concat(answer.records.slice(0, limit - array.length))
-  }
-  array = array.concat(answer.records)
-  return _listPromiseLoop(answer.next(), limit, array)
-}
-
-messenger.find = function (conf, publicKey, func) {
-  return messenger.filter(conf, publicKey, func, 1)
-}
-
-messenger.filter = function (conf, publicKey, func, limit) {
-  const server = resolve.network(conf)
-  const caller = server.transactions().forAccount(publicKey).limit(200)
-  return _filterPromiseLoop(caller.call(), func, limit)
-}
-
-async function _filterPromiseLoop (answerPromise, func, limit, array) {
-  if (!array) array = []
-  const answer = await answerPromise
-  if (answer.records.length === 0) return array
-  for (let index in answer.records) {
-    const tx = answer.records[index]
-    if (func(tx)) array.push(tx)
-    if (array.length === limit) return array
-  }
-  /// Recursive solution :/
-  return _filterPromiseLoop(answer.next(), func, limit, array)
+messenger.find = async function (conf, publicKey, func) {
+  const records = await messenger.list(conf, publicKey, { limit: 1, filter: func })
+  return records[0] || undefined
 }

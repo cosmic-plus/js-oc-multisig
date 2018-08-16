@@ -215,8 +215,9 @@ async function getSignatures (conf, account, txHash, signers) {
     return []
   }
 
-  const records = await messenger.filter(msConfig, msConfig.id,
-    tx => tx.memo_type === 'return' && tx.memo === txHash64)
+  const records = await messenger.list(msConfig, msConfig.id, {
+    filter: (tx) => tx.memo_type === 'return' && tx.memo === txHash64
+  })
 
   const array = []
   for (let index in records) {
