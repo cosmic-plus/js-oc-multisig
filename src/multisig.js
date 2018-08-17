@@ -197,9 +197,10 @@ function disableTx (conf, account) {
  * @async
  */
 function pushTx (msConfig, sender, txHash, signatures) {
-  const memo = new StellarSdk.Memo('return', txHash)
+  const destination = msConfig.id
+  const object = new StellarSdk.Memo('return', txHash)
   const message = Buffer.concat(signatures)
-  return messenger.sendTx(msConfig, sender, msConfig.id, memo, message)
+  return messenger.encode(msConfig, sender, destination, object, message)
 }
 
 /**
@@ -215,7 +216,7 @@ async function getSignatures (conf, account, txHash, signers) {
     return []
   }
 
-  const records = await messenger.list(msConfig, msConfig.id, {
+  const records = await messenger.listRaw(msConfig, msConfig.id, {
     filter: (tx) => tx.memo_type === 'return' && tx.memo === txHash64
   })
 
