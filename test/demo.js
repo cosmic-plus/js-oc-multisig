@@ -27,11 +27,10 @@ async function test () {
     await report('multisig.setup(account2, { network: "public" })')
     await report('multisig.config(account1)')
     await report('multisig.config(account2)')
-    await report('multisig.pushSignatures(transaction1_signed)')
+    await report('multisig.pushSignatures(transaction1_signed, account1)')
     await report('multisig.pushSignatures(transaction2_signed, account1)')
     await report('multisig.pullSignatures(transaction1)')
     await report('multisig.pullSignatures(transaction2)')
-    await report('multisig.disable(account1.publicKey())')
     await report('multisig.disable(account2)')
 
   console.log('')

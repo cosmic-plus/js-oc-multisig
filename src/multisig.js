@@ -9,51 +9,54 @@ const messenger = require('./messenger')
 const axios = require('axios')
 
 multisig.isEnabled = async function (conf, user) {
-  const msConfig = await multisig.config(conf, user)
-  return !!msConfig
+  conf.multisig = await multisig.config(conf, user)
+  return !!conf.multisig
 }
 
 multisig.config = async function (conf, user) {
   const account = await getAccount(conf, user)
-  const msConfig = multisigConfig(conf, account)
+  conf.multisig = parseMultisigConfig(account)
 
-  if (msConfig.id) return msConfig
+  if (conf.multisig.id) return conf.multisig
   else return null
 }
 
 multisig.enable = async function (conf, keypair, options) {
   const account = await getAccount(conf, keypair)
+  conf.multisig = parseMultisigConfig(account)
 
-  if (await multisig.isEnabled(conf, account)) {
+  if (conf.multisig.id) {
     console.log('On-chain signature sharing is already enabled on this account.')
     return null
-  } else {
-    const transaction = setupTx(conf, account, options)
-    return sendOrReturn(conf, transaction, keypair)
   }
+
+  const transaction = makeSetupTx(conf, account, options)
+  return sendOrReturn(conf, transaction, keypair)
 }
 
 multisig.setup = async function (conf, keypair, options) {
   const account = await getAccount(conf, keypair)
+  conf.multisig = parseMultisigConfig(account)
 
-  if (!await multisig.isEnabled(conf, account)) {
+  if (!conf.multisig.id) {
     throw new Error('On-chain signature sharing in not enabled on this account.')
-  } else {
-    const transaction = setupTx(conf, account, options)
-    return sendOrReturn(conf, transaction, keypair)
   }
+
+  const transaction = makeSetupTx(conf, account, options)
+  return sendOrReturn(conf, transaction, keypair)
 }
 
 multisig.disable = async function (conf, keypair) {
   const account = await getAccount(conf, keypair)
+  conf.multisig = parseMultisigConfig(account)
 
-  if (!await multisig.isEnabled(conf, account)) {
+  if (!conf.multisig.id) {
     console.log('On-chain signature sharing is already disabled on this account.')
     return null
-  } else {
-    const transaction = disableTx(conf, account)
-    return sendOrReturn(conf, transaction, keypair)
   }
+
+  const transaction = makeDisableTx(conf, account)
+  return sendOrReturn(conf, transaction, keypair)
 }
 
 /**
@@ -63,63 +66,48 @@ multisig.disable = async function (conf, keypair) {
  * @returns {Transaction|HorizonResponse}
  */
 multisig.pushSignatures = async function (conf, transaction, keypair) {
-  keypair = keypair || StellarSdk.Keypair.fromPublicKey(transaction.source)
-  let account = await getAccount(conf, keypair)
-  const msConfig = multisigConfig(conf, account)
+  let account = await resolve.account(conf, keypair.publicKey())
+  conf.multisig = parseMultisigConfig(account)
 
-  if (!msConfig.id) {
+  if (!conf.multisig.id) {
     throw new Error('On-chain signature sharing in not enabled on this account.')
   }
 
   const txHash = transaction.hash()
   const signatures = transaction.signatures.map(entry => entry.signature())
-
   if (!transaction.signatures.length) return null
 
   /// Send only signatures that have not been uploaded yet.
   const signers = await resolve.txSignersList(conf, transaction)
   const alreadyOnchain = await getSignatures(conf, account, txHash, signers)
-  const newSignatures = _onlyInFirst(signatures, alreadyOnchain)
-
+  const newSignatures = onlyInFirstArray(signatures, alreadyOnchain)
   if (!newSignatures.length) return null
-  if (!keypair.canSign()) return newSignatures
 
-  /// Make and send the transaction with signatures.
   saveNetwork()
 
-  if (conf.network !== msConfig.network) {
-    const promise = _getOrCreateAccount(msConfig, keypair)
-    promise.catch(restoreNetwork)
-    account = await promise
+  /// Switch to mirror account (account on collection network).
+  if (conf.network !== conf.multisig.network) {
+    await maybeCreateAccountOnTestnet(conf.multisig, account.id)
+    account = await resolve.account(conf.multisig, account.id)
   }
 
-  const pusher = await pushTx(msConfig, account, txHash, newSignatures)
-  const response = sendOrReturn(msConfig, pusher, keypair)
-  response.finally(restoreNetwork)
+  /// Make and send the transaction with signatures.
+  const pushTx = await makePushTx(conf, account, txHash, newSignatures)
+  const horizonResponse = sendOrReturn(conf.multisig, pushTx, keypair)
+  horizonResponse.finally(restoreNetwork)
 
-  return response
+  return horizonResponse
 }
 
-function _onlyInFirst (array1, array2) {
+function onlyInFirstArray (array1, array2) {
   return array1.filter(x => !array2.find(y => x.toString() === y.toString()))
-}
-
-async function _getOrCreateAccount (conf, keypair) {
-  const accountId = keypair.publicKey()
-  if (await resolve.accountIsEmpty(conf, accountId)) {
-    if (StellarSdk.Network.current() === StellarSdk.Networks.TESTNET) {
-      await axios('https://friendbot.stellar.org/?addr=' + accountId)
-    } else {
-      throw new Error("Account doesn't exist on the requested network: " + conf.network)
-    }
-  }
-  return resolve.account(conf, accountId)
 }
 
 multisig.pullSignatures = async function (conf, transaction) {
   const account = await getAccount(conf, transaction.source)
+  conf.multisig = parseMultisigConfig(account)
 
-  if (!await multisig.isEnabled(conf, account)) {
+  if (!conf.multisig.id) {
     throw new Error('On-chain signature sharing in not enabled on this account.')
   }
 
@@ -130,19 +118,16 @@ multisig.pullSignatures = async function (conf, transaction) {
 }
 
 multisig.useNetwork = function (conf, network, server) {
-  return resolve.network(conf, network, server)
+  return resolve.network(conf.__proto__, network, server)
 }
 
 /** ***************************** Routines *************************************/
 
 /**
- * Returns the transaction that enable signature sharing for `account`
+ * Returns the transaction that enable signature sharing for `account`.
  */
-function setupTx (conf, account, options = {}) {
-  const msConfig = multisigConfig(conf, account)
-  const multisigId = options.id || msConfig.id ||
-    StellarSdk.Keypair.random().publicKey()
-
+function makeSetupTx (conf, account, options = {}) {
+  const multisigId = options.id || conf.multisig.id || StellarSdk.Keypair.random().publicKey()
   const txBuilder = new StellarSdk.TransactionBuilder(account)
   txBuilder.addMemo(new StellarSdk.Memo('text', 'Setup signature sharing'))
 
@@ -152,14 +137,17 @@ function setupTx (conf, account, options = {}) {
     isEmpty = false
   }
 
-  if (multisigId !== msConfig.id) setData('config:multisig', multisigId)
+  if (multisigId !== conf.multisig.id) setData('config:multisig', multisigId)
 
   if (!options.network) options.network = 'test'
-  if ((options.network || msConfig.network) && options.network !== msConfig.network) {
+  if ((options.network || conf.multisig.network) &&
+    options.network !== conf.multisig.network
+  ) {
     setData('config:multisig:network', options.network)
   }
 
-  if ((options.server || msConfig.server) && options.server !== msConfig.server) {
+  if ((options.server || conf.multisig.server) &&
+    options.server !== conf.multisig.server) {
     setData('config:multisig:server', options.server)
   }
 
@@ -168,11 +156,9 @@ function setupTx (conf, account, options = {}) {
 }
 
 /**
- * Returns then transaction that disable signature sharing for `account`.
+ * Returns the transaction that disable signature sharing for `account`.
  */
-function disableTx (conf, account) {
-  const msConfig = multisigConfig(conf, account)
-
+function makeDisableTx (conf, account) {
   const txBuilder = new StellarSdk.TransactionBuilder(account)
   txBuilder.addMemo(new StellarSdk.Memo('text', 'Disable signature sharing'))
 
@@ -181,10 +167,10 @@ function disableTx (conf, account) {
   }
 
   setData('config:multisig', null)
-  if (msConfig.networ && msConfig.network !== 'test') {
+  if (account.data_attr['multisig:network']) {
     setData('config:multisig:network', null)
   }
-  if (msConfig.server) {
+  if (account.data_attr['multisig:server']) {
     setData('config:multisig:server', null)
   }
 
@@ -196,34 +182,33 @@ function disableTx (conf, account) {
  *
  * @async
  */
-function pushTx (msConfig, sender, txHash, signatures) {
-  const destination = msConfig.id
+function makePushTx (conf, sender, txHash, signatures) {
+  const destination = conf.multisig.id
   const object = new StellarSdk.Memo('return', txHash)
   const message = Buffer.concat(signatures)
-  return messenger.encode(msConfig, sender, destination, object, message)
+  return messenger.encode(conf.multisig, sender, destination, object, message)
 }
 
 /**
  * Returns an array of the signatures shared on-chain for `txHash`.
  */
 async function getSignatures (conf, account, txHash, signers) {
-  const msConfig = multisigConfig(conf, account)
   const txHash64 = txHash.toString('base64')
 
   saveNetwork()
-  if (await resolve.accountIsEmpty(msConfig, msConfig.id)) {
+  if (await resolve.accountIsEmpty(conf.multisig, conf.multisig.id)) {
     restoreNetwork()
     return []
   }
 
-  const records = await messenger.listRaw(msConfig, msConfig.id, {
-    filter: (tx) => tx.memo_type === 'return' && tx.memo === txHash64
+  const records = await messenger.listRaw(conf.multisig, conf.multisig.id, {
+    filter: tx => tx.memo_type === 'return' && tx.memo === txHash64
   })
 
   const array = []
   for (let index in records) {
-    const entry = records[index]
-    const transaction = new StellarSdk.Transaction(entry.envelope_xdr)
+    const txRecord = records[index]
+    const transaction = new StellarSdk.Transaction(txRecord.envelope_xdr)
     if (!signers.find(x => x === transaction.source)) continue
     transaction.operations.forEach(operation => {
       if (operation.type === 'manageData' && operation.name === 'Send') {
@@ -246,14 +231,16 @@ function mergeSignatures (conf, transaction, signatures, txHash, signers) {
     if (txSigs.find(x => x === signature.toString())) continue
     const signer = keys.find(x => x.verify(txHash, signature))
     if (!signer) continue
-    transaction.signatures.push(_makeDecorated(signer, signature))
+    const decoratedSignature = makeDecorated(signer, signature)
+    transaction.signatures.push(decoratedSignature)
     txSigs.push(signature.toString())
     newSignatures = true
   }
 
   return newSignatures
 }
-function _makeDecorated (signer, signature) {
+
+function makeDecorated (signer, signature) {
   const Constructor = StellarSdk.xdr.DecoratedSignature
   return new Constructor({ hint: signer.signatureHint(), signature: signature })
 }
@@ -261,25 +248,24 @@ function _makeDecorated (signer, signature) {
 /** ************************ Generic helpers ***********************************/
 
 /**
- * Returns the multisig account ID for `account` (an AccountResponse).
+ * Returns the multisig configuration.
  */
-function multisigConfig (conf, account) {
+function parseMultisigConfig (account) {
   return {
-    id: _readAttr(account.data_attr['config:multisig']),
-    network: _readAttr(account.data_attr['config:multisig:network']) || 'test',
-    server: _readAttr(account.data_attr['config:multisig:server'])
+    id: readAttr(account.data_attr['config:multisig']),
+    network: readAttr(account.data_attr['config:multisig:network']) || 'test',
+    server: readAttr(account.data_attr['config:multisig:server'])
   }
 }
-function _readAttr (str64) {
-  if (!str64) return undefined
-  else return Buffer.from(str64, 'base64').toString('utf8')
+function readAttr (str64) {
+  if (str64) return Buffer.from(str64, 'base64').toString('utf8')
 }
 
 /**
  * If `user` is already an AccountResponse, return it. Else resolve it.
  */
 async function getAccount (conf, user) {
-  if (_isAccountResponse(user)) return user
+  if (isAccountResponse(user)) return user
   else if (user instanceof StellarSdk.Keypair) user = user.publicKey()
   else if (user instanceof StellarSdk.Account) user = user._accountId
   else if (typeof user !== 'string') throw new TypeError('Invalid user parameter.')
@@ -287,28 +273,39 @@ async function getAccount (conf, user) {
   const account = await resolve.account(conf, user)
   return account
 }
-function _isAccountResponse (obj) {
+function isAccountResponse (obj) {
   return obj && obj._baseAccount && obj._baseAccount instanceof StellarSdk.Account
 }
 
 /**
- * Sign and send transaction if `user` is a Keypair that can sign, else return
- * transaction.
+ * If `value` is a transaction, sign it with `keypair` and send it to horizon.
+ * Else, return `value`.
  */
-async function sendOrReturn (conf, transaction, user) {
-  if (transaction instanceof StellarSdk.Transaction &&
-    user instanceof StellarSdk.Keypair &&
-    user.canSign()
-  ) {
+async function sendOrReturn (conf, value, keypair) {
+  if (value instanceof StellarSdk.Transaction) {
     const server = resolve.network(conf)
-    transaction.sign(user)
-    return server.submitTransaction(transaction)
-      .catch(err => {
-        console.error(err.response)
-        console.log(transaction)
-      })
+    value.sign(keypair)
+    const responsePromise = server.submitTransaction(value)
+    responsePromise.catch(error => {
+      console.error(error.response)
+      console.log(value)
+    })
+    return responsePromise
   } else {
-    return transaction
+    return value
+  }
+}
+
+/**
+ * Create `accoundId` if it is empty & on test network.
+ */
+async function maybeCreateAccountOnTestnet (conf, accountId) {
+  if (await resolve.accountIsEmpty(conf, accountId)) {
+    if (conf.network === 'test') {
+      return axios('https://friendbot.stellar.org/?addr=' + accountId)
+    } else {
+      throw new Error("Account doesn't exist on the requested network: " + conf.network)
+    }
   }
 }
 
@@ -322,6 +319,8 @@ function saveNetwork () {
 }
 
 function restoreNetwork () {
-  console.log('Restore network')
-  StellarSdk.Network.use(networkBackup)
+  if (StellarSdk.Network.current() !== networkBackup) {
+    console.log('Restore network')
+    StellarSdk.Network.use(networkBackup)
+  }
 }

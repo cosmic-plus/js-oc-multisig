@@ -16,8 +16,11 @@ if (isBrowser()) {
 }
 
 /**
- * Automatically pass library configuration to underlying methods
+ * Automatically pass library network configuration to underlying methods.
  */
+
+// baseConf may be modified only by multisig.useNetwork().
+const baseConf = {}
 
 function prepare (module) {
   const layer = {}
@@ -31,7 +34,10 @@ function prepare (module) {
 
 function passConfig (func) {
   return function (...params) {
-    return func(this, ...params)
+    // Make a one-time configuration object and pass it to the underlying
+    // function along with user parameters.
+    const conf = Object.create(baseConf)
+    return func(conf, ...params)
   }
 }
 
