@@ -1,6 +1,6 @@
 {
   "name": "stellar-oc-multisig",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Implements on-chain signature collection for Stellar",
   "main": "src/index.js",
   "scripts": {

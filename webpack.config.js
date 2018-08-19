@@ -6,7 +6,7 @@ module.exports = {
     path: __dirname + '/web',
     filename: 'multisig.js',
     library: 'multisig',
-    libraryTarget: 'var'
+    libraryTarget: 'umd'
   },
   devtool: 'source-map',
   module: {
