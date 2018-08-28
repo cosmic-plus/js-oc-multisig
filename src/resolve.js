@@ -2,7 +2,7 @@
  * Contains functions that probe the blockchain or federation servers to collect
  * datas.
  *
- * Note: this is copied from js-cosmic-lib and I didn't cleaned it up yet
+ * Note: this is copied from js-cosmic-lib and I didnt cleaned it up yet
  *
  * @private
  * @exports resolve
@@ -12,32 +12,52 @@ const resolve = exports
 const helpers = require('./helpers')
 
 /**
- * Select the network to be used by `StellarSdk` as being `c` current
- * network.
  *
  */
+resolve.server = function (conf, network = conf.network, server = conf.server) {
+  const passphrase = networkPassphrase(network)
+  if (!passphrase) throw new Error('No network selected.')
+  return getServer(passphrase, server)
+}
+
+/**
+ * Select the network to be used by `StellarSdk` as being `c` current
+ * network.
+ */
 resolve.network = function (conf, network = conf.network, server = conf.server) {
-  const currentNetwork = StellarSdk.Network.current()
-  let passphrase = currentNetwork && currentNetwork.networkPassphrase()
+  let passphrase = networkPassphrase()
+  const newPassphrase = networkPassphrase(network)
 
-  if (network) {
-    let newPassphrase
-    if (network === 'public') newPassphrase = StellarSdk.Networks.PUBLIC
-    else if (network === 'test') newPassphrase = StellarSdk.Networks.TESTNET
-    else newPassphrase = network
-
-    if (passphrase !== newPassphrase) {
-      console.log('Switch to network: ' + network)
-      StellarSdk.Network.use(new StellarSdk.Network(newPassphrase))
-      passphrase = newPassphrase
-    }
+  if (passphrase !== newPassphrase) {
+    console.log('Switch to network: ' + network)
+    StellarSdk.Network.use(new StellarSdk.Network(newPassphrase))
+    passphrase = newPassphrase
   } else if (!passphrase) {
-    throw new Error('No selected network')
+    throw new Error('No network selected.')
   }
 
   return getServer(passphrase, server)
 }
 
+/**
+ * Returns passphrase for `network` or for current network.
+ */
+function networkPassphrase (network) {
+  if (network) {
+    if (network === 'public') return StellarSdk.Networks.PUBLIC
+    else if (network === 'test') return StellarSdk.Networks.TESTNET
+    else return network
+  } else {
+    const currentNetwork = StellarSdk.Network.current()
+    if (currentNetwork) return currentNetwork.networkPassphrase()
+  }
+}
+
+/**
+ * If `url` is given, set it as the default horizon instance for `passphrase`
+ * network and returns the corresponding Server object.
+ * Else, retrieve the default Server object for `passphrase` network.
+ */
 const serverSaves = {}
 const networkDefaultServer = {}
 function getServer (passphrase, url) {
@@ -131,7 +151,7 @@ async function addressResolver (c, address) {
  * @return {Object} The account response
  */
 resolve.account = async function (c, address, network = c.network) {
-  const server = resolve.network(c, network)
+  const server = resolve.server(c, network)
   const account = await resolve.address(c, address)
   const publicKey = account.account_id
   // try {

@@ -3,6 +3,7 @@
  */
 const multisig = exports
 
+const axios = require('axios')
 const Buffer = require('./buffer')
 const shareSignatures = require('./share-signatures')
 const resolve = require('./resolve')
@@ -73,8 +74,8 @@ multisig.pushSignatures = async function (conf, transaction, keypair) {
   }
 
   saveNetwork()
-  const accountId = keypair.publicKey()
-  const pushTx = await shareSignatures.makePushTx(conf, transaction, accountId)
+  await checkAccountExist(conf.multisig, account.id)
+  const pushTx = await shareSignatures.makePushTx(conf, transaction, account.id)
   const horizonResponse = sendOrReturn(conf.multisig, pushTx, keypair)
   horizonResponse.finally(restoreNetwork)
   return horizonResponse
@@ -184,6 +185,19 @@ async function getAccount (conf, user) {
 }
 function isAccountResponse (obj) {
   return obj && obj._baseAccount && obj._baseAccount instanceof StellarSdk.Account
+}
+
+/**
+ * Create `accoundId` if it is empty & on test network.
+ */
+async function checkAccountExist (conf, accountId) {
+  if (await resolve.accountIsEmpty(conf, accountId)) {
+    if (conf.network === 'test') {
+      return axios('https://friendbot.stellar.org/?addr=' + accountId)
+    } else {
+      throw new Error("Account doesn't exist on the requested network: " + conf.network)
+    }
+  }
 }
 
 /**

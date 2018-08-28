@@ -1,7 +1,6 @@
 'use_strict'
 const shareSignatures = exports
 
-const axios = require('axios')
 const messenger = require('./messenger')
 const resolve = require('./resolve')
 
@@ -22,7 +21,6 @@ shareSignatures.makePushTx = async function (conf, transaction, accountId) {
   if (!newSignatures.length) return null
 
   /// Make the transaction that puts signatures on-chain.
-  await checkAccountExist(conf.multisig, accountId)
   const sender = await resolve.account(conf.multisig, accountId)
   const destination = conf.multisig.id
   const object = new StellarSdk.Memo('return', txHash)
@@ -105,17 +103,4 @@ function mergeSignatures (transaction, signatures, txHash, signers) {
 function makeDecorated (signer, signature) {
   const Constructor = StellarSdk.xdr.DecoratedSignature
   return new Constructor({ hint: signer.signatureHint(), signature: signature })
-}
-
-/**
- * Create `accoundId` if it is empty & on test network.
- */
-async function checkAccountExist (conf, accountId) {
-  if (await resolve.accountIsEmpty(conf, accountId)) {
-    if (conf.network === 'test') {
-      return axios('https://friendbot.stellar.org/?addr=' + accountId)
-    } else {
-      throw new Error("Account doesn't exist on the requested network: " + conf.network)
-    }
-  }
 }

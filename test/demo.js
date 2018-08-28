@@ -16,8 +16,12 @@ async function test () {
   console.log('=========== Test Network ===========')
   console.log('')
   multisig.useNetwork('test')
+    //await report('multisig.isEnabled(account1)')
+    //await report('multisig.setup(account1, { id: StellarSdk.Keypair.random().publicKey() })')
     //await report('multisig.pushTransaction(transaction1_signed, account1)')
+    //await report('multisig.pushTransaction(transaction2_signed, account1')
     //await report('multisig.listTransactions(account1.publicKey())')
+    //return
 
     await report('multisig.isEnabled(account1)')
     await report('multisig.isEnabled(account2)')
