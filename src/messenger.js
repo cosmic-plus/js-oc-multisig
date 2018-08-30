@@ -11,31 +11,31 @@ const loopCall = require('./loopcall')
 const resolve = require('./resolve')
 
 /**
- * Sends `message` to `destinations` with using `keypair`. The maximum size for
- * `message` is 6400 bytes minus the number for `destinations`. The cost of
- * emission is 1 stroop per destination + 1 stroop per 64 bytes to send. When a
+ * Sends a message to `destinations` with using `keypair`. The maximum size for
+ * `content` is 6400 bytes minus the number of `destinations`. The cost of
+ * emission is 1.01 stroop per destination + 1 stroop per 64 bytes to send. When a
  * destination account doesn't exist, it is created on-the-fly which incur an
  * additional cost of 1 lumen each
  *
- * @param {Keypair} keypair The keypair of a valid account.
+ * @param {Keypair} keypair The keypair of the sender.
  * @param {string|Array} destinations An address or an array of addresses (either
  *   account IDs or federated addresses).
  * @param {string|Memo} object  (max. 28 bytes for string).
- * @param {string|Buffer} message The message.
+ * @param {string|Buffer} content The message content.
  * @returns {HorizonResponse}
  */
-messenger.send = async function (conf, keypair, destinations, object, message) {
+messenger.send = async function (conf, keypair, destinations, object, content) {
   const senderAccount = await resolve.account(conf, keypair.publicKey())
-  const tx = await messenger.encode(conf, senderAccount, destinations, object, message)
+  const tx = await messenger.encode(conf, senderAccount, destinations, object, content)
   tx.sign(keypair)
   const server = resolve.network(conf)
   return server.submitTransaction(tx)
 }
 
 /**
- * Build a transaction to be signed by `senderAccount` that sends `message` to
- * `destinations`. The maximum size for `message` is 6400 bytes minus the number
- * of `destinations`. The cost of emission is 2 stroop per destination + 1
+ * Build a transaction to be signed by `senderAccount` that sends message to
+ * `destinations`. The maximum size for `content` is 6400 bytes minus the number
+ * of `destinations`. The cost of emission is 1.01 stroop per destination + 1
  * stroop per 64 bytes to send. When a destination account doesn't exist, it is
  * created on-the-fly which incur an additional cost of 1 lumen each.
  *
@@ -43,14 +43,14 @@ messenger.send = async function (conf, keypair, destinations, object, message) {
  * @param {string|Array} destination The account IDs where to send the message,
  *     or an array of account IDs.
  * @param {string|Memo} object The message object (max. 28 bytes for string).
- * @param {string|Buffer} message The message to be send.
+ * @param {string|Buffer} content The message content.
  * @return {Transaction} A StellarSdk Transaction object.
  */
-messenger.encode = async function (conf, senderAccount, destinations, object, message) {
+messenger.encode = async function (conf, senderAccount, destinations, object, content) {
   const txBuilder = new StellarSdk.TransactionBuilder(senderAccount)
   addMemo(txBuilder, object)
   await addDestinations(conf, txBuilder, destinations)
-  addChunks(txBuilder, message)
+  addContent(txBuilder, content)
   return txBuilder.build()
 }
 
@@ -87,15 +87,15 @@ async function linkToAccount (conf, accountId) {
   }
 }
 
-function addChunks (txBuilder, message) {
-  if (!(message instanceof Buffer)) message = Buffer.from(message)
+function addContent (txBuilder, content) {
+  if (!(content instanceof Buffer)) content = Buffer.from(content)
   const operationsLeft = 100 - txBuilder.operations.length
-  if (message.length > operationsLeft * 64) {
+  if (content.length > operationsLeft * 64) {
     console.log('Warning: message will be truncated.')
   }
 
   for (let i = 0; i < operationsLeft; i++) {
-    const chunk = message.slice(i * 64, i * 64 + 64)
+    const chunk = content.slice(i * 64, i * 64 + 64)
     if (chunk.length === 0) break
     const storeChunk = operation('manageData', { name: 'Send', value: chunk })
     txBuilder.addOperation(storeChunk)
@@ -107,11 +107,11 @@ function operation (type, params) {
 }
 
 /**
- * Return the message object embedded in `txHash`.
+ * Parse the message object from transaction `txHash`.
  *
  * @param {String} txHash A transaction hash
- * @return {Object} A message object with `sender`, `memo`, `date` and
- *     `message` fields.
+ * @return {Object} A message object with `sender`, `object`, `date` and
+ *     `content` fields.
  */
 messenger.read = async function (conf, txHash) {
   const server = resolve.network(conf)
@@ -127,19 +127,20 @@ messenger.decode = function (conf, txRecord) {
     sender: txRecord.source_account,
     object: transaction.memo,
     date: txRecord.created_at,
-    message: extractMessage(transaction)
+    content: extractContent(transaction),
+    txRecord: txRecord
   }
 }
 
-function extractMessage (transaction) {
+function extractContent (transaction) {
   const chunks = []
   transaction.operations.forEach(operation => {
-    if (isMessageChunk(operation)) chunks.push(operation.value)
+    if (isContentChunk(operation)) chunks.push(operation.value)
   })
   return Buffer.concat(chunks)
 }
 
-function isMessageChunk (operation) {
+function isContentChunk (operation) {
   return (operation.type === 'manageData' && operation.name === 'Send')
 }
 
