@@ -74,8 +74,9 @@ multisig.pushSignatures = async function (conf, transaction, keypair) {
   }
 
   saveNetwork()
-  await checkAccountExist(conf.multisig, account.id)
-  const pushTx = await shareSignatures.makePushTx(conf, transaction, account.id)
+  const senderId = keypair.publicKey()
+  await checkAccountExist(conf.multisig, senderId)
+  const pushTx = await shareSignatures.makePushTx(conf, transaction, senderId)
   const horizonResponse = sendOrReturn(conf.multisig, pushTx, keypair)
   horizonResponse.finally(restoreNetwork)
   return horizonResponse

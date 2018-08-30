@@ -9,7 +9,7 @@ const resolve = require('./resolve')
  * `transaction`. The sharing transactions should be signed by `accountId` and
  * sent to `conf.multisig.network`.
  */
-shareSignatures.makePushTx = async function (conf, transaction, accountId) {
+shareSignatures.makePushTx = async function (conf, transaction, senderId) {
   const signatures = transaction.signatures.map(entry => entry.signature())
   if (!transaction.signatures.length) return null
 
@@ -21,7 +21,7 @@ shareSignatures.makePushTx = async function (conf, transaction, accountId) {
   if (!newSignatures.length) return null
 
   /// Make the transaction that puts signatures on-chain.
-  const sender = await resolve.account(conf.multisig, accountId)
+  const sender = await resolve.account(conf.multisig, senderId)
   const destination = conf.multisig.id
   const object = new StellarSdk.Memo('return', txHash)
   const message = Buffer.concat(signatures)
