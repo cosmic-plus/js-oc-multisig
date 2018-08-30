@@ -148,8 +148,9 @@ messenger.list = async function (conf, accountId, options) {
   return records.map(record => messenger.decode(conf, record))
 }
 
-messenger.listRaw = function (conf, accountId, options = {}) {
-  const server = resolve.network(conf)
+messenger.listRaw = async function (conf, accountId, options = {}) {
+  if (await resolve.accountIsEmpty(conf, accountId)) return []
+  const server = resolve.server(conf)
   const callBuilder = server.transactions().forAccount(accountId)
   if (options.cursor) callBuilder.cursor(options.cursor)
   if (options.order) callBuilder.order(options.order)
