@@ -125,10 +125,17 @@ messenger.decode = function (conf, txRecord) {
   if (transaction.operations.length < 2) return null
   return {
     sender: txRecord.source_account,
-    object: transaction.memo,
+    object: extractObject(transaction.memo),
     date: txRecord.created_at,
     content: extractContent(transaction),
-    txRecord: txRecord
+  }
+}
+
+function extractObject (memo) {
+  if (memo._type === 'hash' || memo._type === 'return') {
+    return memo._value.toString('hex')
+  } else {
+    return memo._value.toString('utf8')
   }
 }
 
