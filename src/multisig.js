@@ -6,6 +6,7 @@ const multisig = exports
 const axios = require('axios')
 const Buffer = require('./buffer')
 const shareSignatures = require('./share-signatures')
+const shareTransactions = require('./share-transactions')
 const resolve = require('./resolve')
 
 multisig.isEnabled = async function (conf, user) {
@@ -94,6 +95,42 @@ multisig.pullSignatures = async function (conf, transaction) {
   const bool = await shareSignatures.pull(conf, transaction)
   restoreNetwork()
   return bool
+}
+
+multisig.pushTransaction = async function (conf, transaction, keypair) {
+  const account = await getAccount(conf, keypair)
+  conf.multisig = parseMultisigConfig(account)
+
+  if (!conf.multisig.id) {
+    throw new Error('On-chain transaction sharing is not enabled on this account.')
+  }
+
+  const senderId = keypair.publicKey()
+  const legitSources = account.signers.map(signer => signer.key)
+  if (!legitSources.find(source => source === senderId)) {
+    throw new Error('Not a co-signer for transaction source account: ' + senderId)
+  }
+
+  saveNetwork()
+  await checkAccountExist(conf.multisig, senderId)
+  /// Shadow transaction signatures without modifying the underlying object.
+  transaction = Object.create(transaction)
+  transaction.signatures = []
+  const pushTx = await shareTransactions.makePushTx(conf, transaction, senderId)
+  const horizonResponse = sendOrReturn(conf.multisig, pushTx, keypair)
+  horizonResponse.finally(restoreNetwork)
+  return horizonResponse
+}
+
+multisig.listTransactions = async function (conf, user, ledger) {
+  const account = await getAccount(conf, user)
+  conf.multisig = parseMultisigConfig(account)
+
+  if (!conf.multisig.id) {
+    throw new Error('On-chain transaction sharing is not enabled on this account.')
+  }
+
+  return shareTransactions.list(conf, account, ledger)
 }
 
 multisig.useNetwork = function (conf, network, server) {
@@ -210,10 +247,7 @@ async function sendOrReturn (conf, value, keypair) {
     const server = resolve.network(conf)
     value.sign(keypair)
     const responsePromise = server.submitTransaction(value)
-    responsePromise.catch(error => {
-      console.error(error.response)
-      console.log(value)
-    })
+    responsePromise.catch(error => console.error(error.response))
     return responsePromise
   } else {
     return value

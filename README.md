@@ -1,39 +1,33 @@
 # js-stellar-oc-multisig
 
 **Stellar On-chain Multisignatures** is a JavaScript library that enable
-storing/retrieving signatures on the Stellar blockchain.
+storing/retrieving signatures and transactions on the Stellar blockchain.
 
 Stellar blockchain offers on-chain advanced setups for multi-signature
 accounts and smart-contracts. This is great because it makes it robust and
-secure. However, the signatures collection is not part of it.
+secure. However, signatures collection and transaction sharing is not part of
+it.
 
 Some smart-contracts and account security models may require that signature 
 collection happens on the public ledger. This library implements a way to do so.
 By default, the signatures are stored on the test network. However, it is
 possible to set it up to use public network or any custom network as well.
 
-Once on-chain signature collection is enabled on an account, it may be used each
-from each transaction whose this account is the source. All legit signers for
+Once on-chain multisig is enabled on an account, it may be used for each 
+transaction whose this account is the primary source. All legit signers for 
 this transaction can send any legit signature they have.
+
+This library also implement on-chain transaction sharing among the co-signers of
+an account.
 
 *Disclaimer:* This library is made independently from the Stellar Foundation.
 
 ## This is an alpha release
 
-This initial release is a proof-of-concept to demonstrate how signatures can be 
-stored on the blockchain. While the implemented features are supposed to work, 
-it have not been sufficiently tested to ensure reliability. Please consider 
-yourself as a tester and remember that the provided methods may be modified in
-the future in compatibility-breaking ways.
-
-The simple question of knowing if this developement is desirable at all is 
-still [under 
-discussion](https://galactictalk.org/d/1436-on-chain-signature-collection). 
-Stellar Foundation may actually patch their software in a way that may prevent 
-this library to work.
-
-If oc-multisig gets the greenlight the beta release will be announced
-on [Galactic Talk](https://galactictalk.com).
+This initial release is a proof-of-concept to demonstrate how signatures and 
+transaction can be transmitted over the blockchain. Please consider yourself as 
+a tester and remember that the provided methods may be modified in the future 
+in compatibility-breaking ways.
 
 ## Install
 
@@ -145,6 +139,49 @@ multisig.pullSignatures(transaction)
   }).catch(console.error)
 ```
 
+## Push transaction to the blockchain
+
+This will send `transaction` to the blockchain, without its signatures. Note
+that only legit co-signers can do so: this is not a way to send transaction
+requests to arbitrary accounts. The *Promise* returned by this method resolves
+to the Horizon response, or to null if transaction have already been published.
+
+```js
+multisig.pushTransaction(transaction, keypair)
+  .then(function (response) {
+    if (response) console.log('Transaction shared!')
+    else console.log('Already on-chain.')
+  }).catch(console.error)
+```
+
+## Pull transactions from the blockchain
+
+This will list all transaction shared for `address` since `ledger`
+(not included, optional). Returns an Array of transaction request.
+
+```js
+multisig.listTransactions(address, [ledger])
+  .then (function (requests) {
+    console.log(requests)
+  })
+  .catch(console.error)
+```
+
+Transaction requests are structured this way:
+
+```
+{
+  sender: 'cosignersId',
+  date: 'ISO-9660 date',
+  ledger: 'transaction request ledger',
+  xdr: 'requested transaction xdr',
+}
+```
+
+Transactions request are listed from the newest to the latest and the ledger
+value of the last one can be used as argument for next listing in order to get
+only new requests.
+
 ## Account configuration
 
 The account configuration is stored as account entries on the blockchain. In 
@@ -201,5 +238,10 @@ const server = multisig.useNetwork(public|test|passphrase, horizon_url)
 This method will switch to the declared network, so you don't need to use 
 StellarSdk.Network.use() on top of that.
 
+## Additional resources
+
+* [SEP-0011 proposal](https://github.com/stellar/stellar-protocol/pull/158) for which oc-multisig is the reference implementation
+* [Brain-storm about on-chain signature collection](https://galactictalk.org/d/1436-on-chain-signature-collection)
+* [SBC entry](https://galactictalk.org/d/1591-stellar-oc-multisig-on-chain-multi-signatures-collection-js-lib-protocol/3)
 
 ## That's all Folks !
