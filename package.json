@@ -1,7 +1,7 @@
 {
   "name": "stellar-oc-multisig",
-  "version": "0.2.2",
-  "description": "Implements on-chain signature collection for Stellar",
+  "version": "0.3.0",
+  "description": "Implements on-chain signature & transaction sharing for Stellar",
   "main": "src/index.js",
   "scripts": {
     "test": "jasmine test/*.js 2>&1 | more",
@@ -17,9 +17,11 @@
   "keywords": [
     "blockchain",
     "stellar",
+    "on-chain",
     "multisig",
     "signature",
-    "collection"
+    "transaction",
+    "sharing"
   ],
   "homepage": "https://github.com/MisterTicot/js-stellar-oc-multisig",
   "author": "Mister.Ticot",
