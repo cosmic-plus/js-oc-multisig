@@ -12,10 +12,10 @@
  * const callBuilder = server.transactions().forAccount('GDE...YBX')
  * const allTransactions = await loopcall(callBuilder)
  * const transactionWithoutMemo = await loopcall(callBuilder, {
- *   options.filter: (tx) => tx.memo
+ *   filter: (tx) => !tx.memo
  * }
  * const thisYearTransactions = await loopcall(callBuilder, {
- *   options.breaker: (tx) => tx.created_at.substr(0,4) < 2018
+ *   breaker: (tx) => tx.created_at.substr(0,4) < 2018
  * }
  * 
  * @example
@@ -23,10 +23,10 @@
  * const 2000firstOperations = await loopcall(callBuilder, { limit: 2000 })
  * const 20firstAccountCreations = await loopcall(callBuilder, {
  *   limit: 20,
- *   options.filter: (op) => op.type === 'create_account'
+ *   filter: (op) => op.type === 'create_account'
  * }
  * 
- * @param {Object} callAnswer A resolved CallBuilder.call() object
+ * @param {CallBuilder} callBuilder A CallBuilder object
  * @param {Object} [options]
  * @param {integer} [options.limit] The maximum number of record to return
  * @param {function} [options.filter] A function that accept a record argument. It
