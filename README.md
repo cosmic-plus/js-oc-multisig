@@ -1,4 +1,4 @@
-# js-stellar-oc-multisig
+# @cosmic-plus/oc-multisig
 
 **Stellar On-chain Multisignatures** is a JavaScript library that enable
 storing/retrieving signatures and transactions on the Stellar blockchain.
@@ -22,50 +22,31 @@ an account.
 
 *Disclaimer:* This library is made independently from the Stellar Foundation.
 
-## This is an alpha release
-
-This initial release is a proof-of-concept to demonstrate how signatures and 
-transaction can be transmitted over the blockchain. Please consider yourself as 
-a tester and remember that the provided methods may be modified in the future 
-in compatibility-breaking ways.
-
 ## Install
 
 ### NPM/Yarn
 
-* `npm install stellar-oc-multisig`
-* `yarn add stellar-oc-multisig`
+* NPM: `npm install @cosmic-plus/oc-multisig`
+* Yarn: `yarn add @cosmic-plus/oc-multisig`
 
-```js
-import multisig from 'stellar-oc-multisig'
-// Or
-const multisig = require('stellar-oc-multisig')
-```
+In your scripts: ```const multisig = require('@cosmic-plus/oc-multisig')```
 
 ### Bower
 
-`bower install stellar-oc-multisig`
+`bower install cosmic-plus-oc-multisig`
 
 In your HTML pages:
 
 ```HTML
-  <body>
-  ...
-    <!-- Best placed at the end of body to not delay page loading -->
-    <script src="./bower_components/stellar-sdk/stellar-sdk.min.js"></script>
-    <script src="./bower_components/stellar-oc-multisig/multisig.js"></script>
-  </body>
+<script src="./bower_components/stellar-sdk/stellar-sdk.min.js"></script>
+<script src="./bower_components/cosmic-plus-oc-multisig/multisig.js"></script>
 ```
 
 ### HTML
 
 ```HTML
-  <body>
-  ...
-    <!-- Best placed at the end of body to not delay page loading -->
-    <script src="https://unpkg.com/stellar-sdk/dist/stellar-sdk.min.js"></script>
-    <script src="https://raw.github.com/MisterTicot/web-stellar-oc-multisig/master/multisig.js"></script>
-  </body>
+<script src="https://unpkg.com/stellar-sdk/dist/stellar-sdk.min.js"></script>
+<script src="https://raw.github.com/cosmic-plus/web-oc-multisig/master/multisig.js"></script>
 ```
 
 Note: For production release it is advised to serve your own copy of the libraries.
@@ -75,39 +56,27 @@ Note: For production release it is advised to serve your own copy of the librari
 ### Enable on-chain signature collection on an account
 
 ```js
-multisig.enable(keypair, ...options)
-  .then(function(response) { // Horizon response or null if already enabled
-    console.log('On-chain signature collection is enabled!')
-  }).catch(console.error)
+const response = await multisig.enable(keypair, ...options)
 
-// To collect signatures on testnet:
-multisig.enable(keypair)
+// The default collector network is testnet.
+// To use public as collector network instead of testnet:
+await multisig.enable(keypair, { network: 'public' })
 
-// To collect signatures on publicnet:
-multisig.enable(keypair, { network: 'public' })
-
-// To collect signatures on a custom network:
-multisig.enable(keypair, { network: 'network_passphrase', server: 'horizon_url' })
+// To use a custom network instead:
+await multisig.enable(keypair, { network: 'network_passphrase', server: 'horizon_url' })
 ```
 
 
 ### Disable on-chain signature collection on an account
 
 ```js
-multisig.disable(keypair)
-  .then(function(response) { /// Horizon response or null if already disabled
-    console.log('On-chain signature collection disabled!')
-  }).catch(console.error)
+const response = await multisig.disable(keypair)
 ```
 
 ### Test if oc-multisig is enabled
 
 ```js
-multisig.isEnabled(address|publicKey|keypair|AccountResponse)
-  .then(function (bool) {
-    if (bool) console.log('On-chain signature collection is enabled.')
-    else console.log('On-chain signature collection is disabled.')
-  }).catch(console.error)
+const bool = await multisig.isEnabled(address|publicKey|keypair|AccountResponse)
 ```
 
 ### Push signatures to the blockchain
@@ -117,11 +86,7 @@ blockchain. Will throw an error if `keypair` is not a legit signer for
 `transaction`.
 
 ```js
-multisig.pushSignatures(transaction, keypair)
-  .then(function (response) {
-    if (response) console.log('New signature(s) have been shared.')
-    else console.log('No new signature to share.')
-  }).catch(console.error)
+const response = await multisig.pushSignatures(transaction, keypair)
 ```
 
 ### Pull signatures from the blockchain
@@ -132,11 +97,7 @@ by this method resolves to a *boolean* that is `true` when new signatures were
 fetched, `false` otherwise.
 
 ```js
-multisig.pullSignatures(transaction)
-  .then(function (response) {
-    if (response) console.log('New signature(s) have been added.')
-    else console.log('No new signature to download.')
-  }).catch(console.error)
+const bool = await multisig.pullSignatures(transaction)
 ```
 
 ## Push transaction to the blockchain
@@ -147,11 +108,7 @@ requests to arbitrary accounts. The *Promise* returned by this method resolves
 to the Horizon response, or to null if transaction have already been published.
 
 ```js
-multisig.pushTransaction(transaction, keypair)
-  .then(function (response) {
-    if (response) console.log('Transaction shared!')
-    else console.log('Already on-chain.')
-  }).catch(console.error)
+const response = await multisig.pushTransaction(transaction, keypair)
 ```
 
 ## Pull transactions from the blockchain
@@ -160,11 +117,7 @@ This will list all transaction shared for `address` since `ledger`
 (not included, optional). Returns an Array of transaction request.
 
 ```js
-multisig.listTransactions(address, [ledger])
-  .then (function (requests) {
-    console.log(requests)
-  })
-  .catch(console.error)
+const requestsArray = await multisig.listTransactions(address, [ledger])
 ```
 
 Transaction requests are structured this way:
@@ -206,20 +159,13 @@ the library, it is represented as an object:
 ### Get account configuration
 
 ```js
-multisig.config(address|publicKey|keypair|AccountResponse)
-  .then(function(obj) {
-    console.log(obj)
-  }).catch(console.error)
+const config = await multisig.config(address|publicKey|keypair|AccountResponse)
 ```
 
 ### Change account configuration
 
 ```js
-multisig.setup(keypair, { network: ..., server: ..., id: ...})
-  .then(function (response) { /// Horizon response or null if no change was needed.
-    if (response) console.log('On-chain signature collection setup updated!')
-    else console.log('Nothing to change.')
-  }).catch(console.error)
+const response = await multisig.setup(keypair, { network: ..., server: ..., id: ...})
 ```
 
 ## Use a custom network
