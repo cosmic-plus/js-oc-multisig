@@ -1,6 +1,6 @@
 {
-  "name": "stellar-oc-multisig",
-  "version": "0.3.1",
+  "name": "@cosmic-plus/oc-multisig",
+  "version": "0.3.2",
   "description": "Implements on-chain signature & transaction sharing for Stellar",
   "main": "src/index.js",
   "scripts": {
@@ -23,10 +23,9 @@
     "transaction",
     "sharing"
   ],
-  "homepage": "https://github.com/MisterTicot/js-stellar-oc-multisig",
   "author": "Mister.Ticot",
   "license": "MIT",
-  "repository": "github:MisterTicot/js-stellar-oc-multisig",
+  "repository": "github:cosmic-plus/node-oc-multisig",
   "browserList": "last 4 versions, > 0.1%",
   "devDependencies": {
     "babel-loader": "^7.1.4",
