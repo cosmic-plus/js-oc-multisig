@@ -6,8 +6,10 @@
  */
 const messenger = exports
 
-const Buffer = require('./buffer')
-const loopCall = require('./loopcall')
+const Buffer = require('@cosmic-plus/base/buffer')
+const loopcall = require('@cosmic-plus/loopcall')
+const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+
 const resolve = require('./resolve')
 
 /**
@@ -163,7 +165,7 @@ messenger.listRaw = async function (conf, accountId, options = {}) {
   if (options.cursor) callBuilder.cursor(options.cursor)
   if (options.order) callBuilder.order(options.order)
   options.filter = makeMessageFilter(options.filter)
-  return loopCall(callBuilder, options)
+  return loopcall(callBuilder, options)
 }
 
 function makeMessageFilter (baseFilter) {

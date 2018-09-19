@@ -3,11 +3,13 @@
  */
 const multisig = exports
 
-const axios = require('axios')
-const Buffer = require('./buffer')
+const axios = require('@cosmic-plus/base/axios')
+const Buffer = require('@cosmic-plus/base/buffer')
+const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+
+const resolve = require('./resolve')
 const shareSignatures = require('./share-signatures')
 const shareTransactions = require('./share-transactions')
-const resolve = require('./resolve')
 
 multisig.isEnabled = async function (conf, user) {
   conf.multisig = await multisig.config(conf, user)

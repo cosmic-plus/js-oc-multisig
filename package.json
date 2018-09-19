@@ -40,7 +40,8 @@
     "webpack-cli": "^2.1.4"
   },
   "dependencies": {
-    "axios": "^0.18.0",
-    "stellar-sdk": "^0.10.3"
+    "@cosmic-plus/base": "^1.0.2",
+    "@cosmic-plus/jsutils": "^1.0.0",
+    "@cosmic-plus/loopcall": "^1.0.4"
   }
 }

@@ -1,6 +1,8 @@
 'use_strict'
 const shareTransactions = exports
 
+const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+
 const messenger = require('./messenger')
 const resolve = require('./resolve')
 

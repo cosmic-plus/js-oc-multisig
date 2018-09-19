@@ -2,18 +2,7 @@
  * Environment detection and library loading.
  */
 
-const isBrowser = new Function('try { return this === window } catch (e) { return false }')
-const isNode = new Function('try { return this === global } catch (e) { return false }')
-
-if (isBrowser()) {
-  if (typeof StellarSdk === 'undefined') {
-    throw new Error('stellar-ledger-wallet depends on StellarSdk.')
-  }
-} else if (isNode()) {
-  /// Prevent StellarSdk to be bundled by any bundler.
-  const stealth_require = eval('require')
-  global.StellarSdk = stealth_require('stellar-sdk')
-}
+const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
 
 /**
  * Automatically pass library network configuration to underlying methods.

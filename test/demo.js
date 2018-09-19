@@ -1,4 +1,5 @@
 const multisig = require('../src')
+const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
 
 /// Please don't mess with those accounts ^^^(*.*)^^^.
 const account1 = StellarSdk.Keypair.fromSecret('SDTSZAHJXKHE5PR6WAPAZ7BH3GMOYYDTQ5Z2RJHGWSYCOM45FWFKTJSU')

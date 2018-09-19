@@ -1,6 +1,9 @@
 'use_strict'
 const shareSignatures = exports
 
+const Buffer = require('@cosmic-plus/base/buffer')
+const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+
 const messenger = require('./messenger')
 const resolve = require('./resolve')
 
