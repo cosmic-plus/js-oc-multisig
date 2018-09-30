@@ -26,7 +26,7 @@
   "author": "Mister.Ticot",
   "license": "MIT",
   "repository": "github:cosmic-plus/node-oc-multisig",
-  "browserList": "last 4 versions, > 0.1%",
+  "browserslist": "last 4 versions, > 0.1%",
   "devDependencies": {
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-regenerator": "^6.26.0",
