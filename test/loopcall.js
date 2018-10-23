@@ -1,6 +1,6 @@
 'use_strict'
 const StellarSdk = require('stellar-sdk')
-const loopcall = require('../src/loopcall')
+const loopcall = require('@cosmic-plus/loopcall')
 
 const server = new StellarSdk.Server('https://horizon.stellar.org')
 const account = 'GAWO2C52D57XBT7SQL6YB3XPHFLFD2J4Z5RN7HPFZSHXJMXH72HRXNV3'
