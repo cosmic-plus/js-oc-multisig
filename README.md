@@ -45,8 +45,8 @@ In your HTML pages:
 ### HTML
 
 ```HTML
-<script src="https://unpkg.com/stellar-sdk/dist/stellar-sdk.min.js"></script>
-<script src="https://raw.github.com/cosmic-plus/web-oc-multisig/master/multisig.js"></script>
+<script src="https://cosmic.plus/stellar-sdk/stellar-sdk.min.js"></script>
+<script src="https://cosmic.plus/web-oc-multisig/multisig.js"></script>
 ```
 
 Note: For production release it is advised to serve your own copy of the libraries.
