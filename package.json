@@ -1,8 +1,21 @@
 {
   "name": "@cosmic-plus/oc-multisig",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Implements on-chain signature & transaction sharing for Stellar",
+  "author": "MisterTicot",
+  "repository": "github:cosmic-plus/node-oc-multisig",
+  "license": "MIT",
+  "browserslist": "last 4 versions, > 0.1%",
   "main": "src/index.js",
+  "keywords": [
+    "blockchain",
+    "stellar",
+    "on-chain",
+    "multisig",
+    "signature",
+    "transaction",
+    "sharing"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "get": "git submodule update -i --recursive",
@@ -14,19 +27,6 @@
     "check": "npm run get && cp web/package-lock.json . && npm ci && npm run build && cd web && git status",
     "watch": "webpack -d --watch"
   },
-  "keywords": [
-    "blockchain",
-    "stellar",
-    "on-chain",
-    "multisig",
-    "signature",
-    "transaction",
-    "sharing"
-  ],
-  "author": "Mister.Ticot",
-  "license": "MIT",
-  "repository": "github:cosmic-plus/node-oc-multisig",
-  "browserslist": "last 4 versions, > 0.1%",
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "@babel/plugin-transform-runtime": "^7.1.0",
