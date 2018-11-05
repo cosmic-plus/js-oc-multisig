@@ -1,11 +1,11 @@
-'use_strict'
+"use_strict"
 const shareSignatures = exports
 
-const Buffer = require('@cosmic-plus/base/buffer')
-const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+const Buffer = require("@cosmic-plus/base/buffer")
+const StellarSdk = require("@cosmic-plus/base/stellar-sdk")
 
-const messenger = require('./messenger')
-const resolve = require('./resolve')
+const messenger = require("./messenger")
+const resolve = require("./resolve")
 
 /**
  * Returns a sharing transaction that will push any new signature from
@@ -26,7 +26,7 @@ shareSignatures.makePushTx = async function (conf, transaction, senderId) {
   /// Make the transaction that puts signatures on-chain.
   const sender = await resolve.account(conf.multisig, senderId)
   const destination = conf.multisig.id
-  const object = new StellarSdk.Memo('return', txHash)
+  const object = new StellarSdk.Memo("return", txHash)
   const message = Buffer.concat(signatures)
   return messenger.encode(conf.multisig, sender, destination, object, message)
 }
@@ -49,7 +49,7 @@ shareSignatures.pull = async function (conf, transaction) {
  * Returns an array of the signatures shared on-chain for `txHash`.
  */
 async function getSignatures (conf, txHash, signers) {
-  const txHash64 = txHash.toString('base64')
+  const txHash64 = txHash.toString("base64")
 
   if (await resolve.accountIsEmpty(conf.multisig, conf.multisig.id)) {
     return []
@@ -57,7 +57,7 @@ async function getSignatures (conf, txHash, signers) {
 
   /// Get transactions that embed shared signatures for transaction.
   const records = await messenger.listRaw(conf.multisig, conf.multisig.id, {
-    filter: tx => tx.memo_type === 'return' && tx.memo === txHash64
+    filter: tx => tx.memo_type === "return" && tx.memo === txHash64
   })
 
   const signatures = []
@@ -78,7 +78,7 @@ function isTxSourceLegit (transaction, signers) {
 }
 
 function containsSignature (operation) {
-  return operation.type === 'manageData' && operation.name === 'Send'
+  return operation.type === "manageData" && operation.name === "Send"
 }
 
 /**

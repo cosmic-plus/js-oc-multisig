@@ -2,8 +2,6 @@
  * Environment detection and library loading.
  */
 
-const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
-
 /**
  * Automatically pass library network configuration to underlying methods.
  */
@@ -14,7 +12,7 @@ const baseConf = {}
 function prepare (module) {
   const layer = {}
   for (let name in module) {
-    if (typeof module[name] !== 'function') continue
+    if (typeof module[name] !== "function") continue
     layer[name] = passConfig(module[name])
   }
 
@@ -30,4 +28,4 @@ function passConfig (func) {
   }
 }
 
-module.exports = prepare(require('./multisig'))
+module.exports = prepare(require("./multisig"))

@@ -3,13 +3,13 @@
  */
 const multisig = exports
 
-const axios = require('@cosmic-plus/base/axios')
-const Buffer = require('@cosmic-plus/base/buffer')
-const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+const axios = require("@cosmic-plus/base/axios")
+const Buffer = require("@cosmic-plus/base/buffer")
+const StellarSdk = require("@cosmic-plus/base/stellar-sdk")
 
-const resolve = require('./resolve')
-const shareSignatures = require('./share-signatures')
-const shareTransactions = require('./share-transactions')
+const resolve = require("./resolve")
+const shareSignatures = require("./share-signatures")
+const shareTransactions = require("./share-transactions")
 
 multisig.isEnabled = async function (conf, user) {
   conf.multisig = await multisig.config(conf, user)
@@ -29,7 +29,8 @@ multisig.enable = async function (conf, keypair, options) {
   conf.multisig = parseMultisigConfig(account)
 
   if (conf.multisig.id) {
-    console.log('On-chain signature sharing is already enabled on this account.')
+    // eslint-disable-next-line no-console
+    console.log("On-chain signature sharing is already enabled on this account.")
     return null
   }
 
@@ -42,7 +43,7 @@ multisig.setup = async function (conf, keypair, options) {
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
-    throw new Error('On-chain signature sharing in not enabled on this account.')
+    throw new Error("On-chain signature sharing in not enabled on this account.")
   }
 
   const transaction = makeSetupTx(conf, account, options)
@@ -54,7 +55,8 @@ multisig.disable = async function (conf, keypair) {
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
-    console.log('On-chain signature sharing is already disabled on this account.')
+    // eslint-disable-next-line no-console
+    console.log("On-chain signature sharing is already disabled on this account.")
     return null
   }
 
@@ -73,7 +75,7 @@ multisig.pushSignatures = async function (conf, transaction, keypair) {
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
-    throw new Error('On-chain signature sharing in not enabled on this account.')
+    throw new Error("On-chain signature sharing in not enabled on this account.")
   }
 
   saveNetwork()
@@ -90,7 +92,7 @@ multisig.pullSignatures = async function (conf, transaction) {
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
-    throw new Error('On-chain signature sharing in not enabled on this account.')
+    throw new Error("On-chain signature sharing in not enabled on this account.")
   }
 
   saveNetwork()
@@ -104,13 +106,13 @@ multisig.pushTransaction = async function (conf, transaction, keypair) {
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
-    throw new Error('On-chain transaction sharing is not enabled on this account.')
+    throw new Error("On-chain transaction sharing is not enabled on this account.")
   }
 
   const senderId = keypair.publicKey()
   const legitSources = account.signers.map(signer => signer.key)
   if (!legitSources.find(source => source === senderId)) {
-    throw new Error('Not a co-signer for transaction source account: ' + senderId)
+    throw new Error("Not a co-signer for transaction source account: " + senderId)
   }
 
   saveNetwork()
@@ -129,7 +131,7 @@ multisig.listTransactions = async function (conf, user, ledger) {
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
-    throw new Error('On-chain transaction sharing is not enabled on this account.')
+    throw new Error("On-chain transaction sharing is not enabled on this account.")
   }
 
   return shareTransactions.list(conf, account, ledger)
@@ -147,7 +149,7 @@ multisig.useNetwork = function (conf, network, server) {
 function makeSetupTx (conf, account, options = {}) {
   const multisigId = options.id || conf.multisig.id || StellarSdk.Keypair.random().publicKey()
   const txBuilder = new StellarSdk.TransactionBuilder(account)
-  txBuilder.addMemo(new StellarSdk.Memo('text', 'Setup signature sharing'))
+  txBuilder.addMemo(new StellarSdk.Memo("text", "Setup signature sharing"))
 
   let isEmpty = true
   const setData = function (name, value) {
@@ -155,18 +157,18 @@ function makeSetupTx (conf, account, options = {}) {
     isEmpty = false
   }
 
-  if (multisigId !== conf.multisig.id) setData('config:multisig', multisigId)
+  if (multisigId !== conf.multisig.id) setData("config:multisig", multisigId)
 
-  if (!options.network) options.network = 'test'
+  if (!options.network) options.network = "test"
   if ((options.network || conf.multisig.network) &&
     options.network !== conf.multisig.network
   ) {
-    setData('config:multisig:network', options.network)
+    setData("config:multisig:network", options.network)
   }
 
   if ((options.server || conf.multisig.server) &&
     options.server !== conf.multisig.server) {
-    setData('config:multisig:server', options.server)
+    setData("config:multisig:server", options.server)
   }
 
   if (isEmpty) return null
@@ -178,18 +180,18 @@ function makeSetupTx (conf, account, options = {}) {
  */
 function makeDisableTx (conf, account) {
   const txBuilder = new StellarSdk.TransactionBuilder(account)
-  txBuilder.addMemo(new StellarSdk.Memo('text', 'Disable signature sharing'))
+  txBuilder.addMemo(new StellarSdk.Memo("text", "Disable signature sharing"))
 
   const setData = function (name, value) {
     txBuilder.addOperation(StellarSdk.Operation.manageData({ name: name, value: value }))
   }
 
-  setData('config:multisig', null)
-  if (account.data_attr['multisig:network']) {
-    setData('config:multisig:network', null)
+  setData("config:multisig", null)
+  if (account.data_attr["multisig:network"]) {
+    setData("config:multisig:network", null)
   }
-  if (account.data_attr['multisig:server']) {
-    setData('config:multisig:server', null)
+  if (account.data_attr["multisig:server"]) {
+    setData("config:multisig:server", null)
   }
 
   return txBuilder.build()
@@ -202,13 +204,13 @@ function makeDisableTx (conf, account) {
  */
 function parseMultisigConfig (account) {
   return {
-    id: readAttr(account.data_attr['config:multisig']),
-    network: readAttr(account.data_attr['config:multisig:network']) || 'test',
-    server: readAttr(account.data_attr['config:multisig:server'])
+    id: readAttr(account.data_attr["config:multisig"]),
+    network: readAttr(account.data_attr["config:multisig:network"]) || "test",
+    server: readAttr(account.data_attr["config:multisig:server"])
   }
 }
 function readAttr (str64) {
-  if (str64) return Buffer.from(str64, 'base64').toString('utf8')
+  if (str64) return Buffer.from(str64, "base64").toString("utf8")
 }
 
 /**
@@ -218,7 +220,7 @@ async function getAccount (conf, user) {
   if (isAccountResponse(user)) return user
   else if (user instanceof StellarSdk.Keypair) user = user.publicKey()
   else if (user instanceof StellarSdk.Account) user = user._accountId
-  else if (typeof user !== 'string') throw new TypeError('Invalid user parameter.')
+  else if (typeof user !== "string") throw new TypeError("Invalid user parameter.")
 
   const account = await resolve.account(conf, user)
   return account
@@ -232,8 +234,8 @@ function isAccountResponse (obj) {
  */
 async function checkAccountExist (conf, accountId) {
   if (await resolve.accountIsEmpty(conf, accountId)) {
-    if (conf.network === 'test') {
-      return axios('https://friendbot.stellar.org/?addr=' + accountId)
+    if (conf.network === "test") {
+      return axios("https://friendbot.stellar.org/?addr=" + accountId)
     } else {
       throw new Error("Account doesn't exist on the requested network: " + conf.network)
     }
@@ -267,7 +269,8 @@ function saveNetwork () {
 
 function restoreNetwork () {
   if (StellarSdk.Network.current() !== networkBackup) {
-    console.log('Restore network')
+    // eslint-disable-next-line no-console
+    console.log("Restore network")
     StellarSdk.Network.use(networkBackup)
   }
 }

@@ -9,15 +9,15 @@
  */
 const resolve = exports
 
-const helpers = require('@cosmic-plus/jsutils/misc')
-const StellarSdk = require('@cosmic-plus/base/stellar-sdk')
+const helpers = require("@cosmic-plus/jsutils/misc")
+const StellarSdk = require("@cosmic-plus/base/stellar-sdk")
 
 /**
  *
  */
 resolve.server = function (conf, network = conf.network, server = conf.server) {
   const passphrase = networkPassphrase(network)
-  if (!passphrase) throw new Error('No network selected.')
+  if (!passphrase) throw new Error("No network selected.")
   return getServer(passphrase, server)
 }
 
@@ -30,11 +30,12 @@ resolve.network = function (conf, network = conf.network, server = conf.server) 
   const newPassphrase = networkPassphrase(network)
 
   if (passphrase !== newPassphrase) {
-    console.log('Switch to network: ' + network)
+    // eslint-disable-next-line no-console
+    console.log("Switch to network: " + network)
     StellarSdk.Network.use(new StellarSdk.Network(newPassphrase))
     passphrase = newPassphrase
   } else if (!passphrase) {
-    throw new Error('No network selected.')
+    throw new Error("No network selected.")
   }
 
   return getServer(passphrase, server)
@@ -45,8 +46,8 @@ resolve.network = function (conf, network = conf.network, server = conf.server) 
  */
 function networkPassphrase (network) {
   if (network) {
-    if (network === 'public') return StellarSdk.Networks.PUBLIC
-    else if (network === 'test') return StellarSdk.Networks.TESTNET
+    if (network === "public") return StellarSdk.Networks.PUBLIC
+    else if (network === "test") return StellarSdk.Networks.TESTNET
     else return network
   } else {
     const currentNetwork = StellarSdk.Network.current()
@@ -64,15 +65,15 @@ const networkDefaultServer = {}
 function getServer (passphrase, url) {
   if (url) networkDefaultServer[passphrase] = url
   else url = networkDefaultServer[passphrase]
-  if (!url) throw new Error('No default server for requested network.')
+  if (!url) throw new Error("No default server for requested network.")
 
   if (!serverSaves[url]) serverSaves[url] = new StellarSdk.Server(url)
   return serverSaves[url]
 }
 
 /// Save defaults horizon nodes.
-getServer(StellarSdk.Networks.PUBLIC, 'https://horizon.stellar.org')
-getServer(StellarSdk.Networks.TESTNET, 'https://horizon-testnet.stellar.org')
+getServer(StellarSdk.Networks.PUBLIC, "https://horizon.stellar.org")
+getServer(StellarSdk.Networks.TESTNET, "https://horizon-testnet.stellar.org")
 
 /**
  * Configure for how much time the resolved addresses are kept in cache,
@@ -135,7 +136,7 @@ async function addressResolver (c, address) {
 
   const account = await StellarSdk.FederationServer.resolve(address)
   const publicKey = account.account_id
-  if (!publicKey) throw new Error('Invalid response from federation server.')
+  if (!publicKey) throw new Error("Invalid response from federation server.")
   if (!account.memo_type && account.memo !== undefined) delete account.memo
   if (address !== publicKey) account.address = address
   const alias = c.aliases && c.aliases[publicKey]
@@ -171,7 +172,7 @@ resolve.accountIsEmpty = async function (conf, id) {
   // const caller = server.accounts()
   // const data = await caller.accountId(account.account_id).call()
   // console.log(data)
-  return resolve.account(conf, id).then(x => false).catch(x => true)
+  return resolve.account(conf, id).then(() => false).catch(() => true)
 }
 
 resolve.transaction = async function (conf, txHash) {
@@ -242,7 +243,7 @@ async function getTxSignersList (conf, transaction) {
   return resolve.signersList(conf, ...sources)
 }
 
-const extraField = 'extra_ocmultisig'
+const extraField = "extra_ocmultisig"
 function useExtra (obj) {
   if (!obj[extraField]) obj[extraField] = {}
   return obj[extraField]
