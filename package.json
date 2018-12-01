@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@cosmic-plus/base": "^1.1.0",
-    "@cosmic-plus/jsutils": "^1.6.0",
+    "@cosmic-plus/jsutils": "^1.10.0",
     "@cosmic-plus/loopcall": "^1.0.4"
   }
 }
