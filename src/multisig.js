@@ -172,7 +172,7 @@ function makeSetupTx (conf, account, options = {}) {
   }
 
   if (isEmpty) return null
-  else return txBuilder.build()
+  else return txBuilder.setTimeout(StellarSdk.InfiniteTimeout).build()
 }
 
 /**
@@ -194,7 +194,7 @@ function makeDisableTx (conf, account) {
     setData("config:multisig:server", null)
   }
 
-  return txBuilder.build()
+  return txBuilder.setTimeout(StellarSdk.InfiniteTimeout).build()
 }
 
 /** ************************ Generic helpers ***********************************/

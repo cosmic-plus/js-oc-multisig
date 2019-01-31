@@ -53,7 +53,7 @@ messenger.encode = async function (conf, senderAccount, destinations, object, co
   addMemo(txBuilder, object)
   await addDestinations(conf, txBuilder, destinations)
   addContent(txBuilder, content)
-  return txBuilder.build()
+  return txBuilder.setTimeout(StellarSdk.InfiniteTimeout).build()
 }
 
 function addMemo (txBuilder, memo) {
