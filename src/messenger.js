@@ -28,7 +28,13 @@ const resolve = require("./resolve")
  */
 messenger.send = async function (conf, keypair, destinations, object, content) {
   const senderAccount = await resolve.account(conf, keypair.publicKey())
-  const tx = await messenger.encode(conf, senderAccount, destinations, object, content)
+  const tx = await messenger.encode(
+    conf,
+    senderAccount,
+    destinations,
+    object,
+    content
+  )
   tx.sign(keypair)
   const server = resolve.network(conf)
   return server.submitTransaction(tx)
@@ -48,7 +54,13 @@ messenger.send = async function (conf, keypair, destinations, object, content) {
  * @param {string|Buffer} content The message content.
  * @return {Transaction} A StellarSdk Transaction object.
  */
-messenger.encode = async function (conf, senderAccount, destinations, object, content) {
+messenger.encode = async function (
+  conf,
+  senderAccount,
+  destinations,
+  object,
+  content
+) {
   const txBuilder = new StellarSdk.TransactionBuilder(senderAccount)
   addMemo(txBuilder, object)
   await addDestinations(conf, txBuilder, destinations)
@@ -58,14 +70,16 @@ messenger.encode = async function (conf, senderAccount, destinations, object, co
 
 function addMemo (txBuilder, memo) {
   if (typeof memo === "string") {
-    const slicedMemo = Buffer.from(memo).slice(0, 28).toString()
+    const slicedMemo = Buffer.from(memo)
+      .slice(0, 28)
+      .toString()
     memo = new StellarSdk.Memo("text", slicedMemo)
   }
   if (memo) txBuilder.addMemo(memo)
 }
 
 async function addDestinations (conf, txBuilder, destinations) {
-  if (!Array.isArray(destinations)) destinations = [ destinations ]
+  if (!Array.isArray(destinations)) destinations = [destinations]
 
   for (let index in destinations) {
     const accountId = destinations[index]
@@ -130,7 +144,7 @@ messenger.decode = function (conf, txRecord) {
     sender: txRecord.source_account,
     object: extractObject(transaction.memo),
     date: txRecord.created_at,
-    content: extractContent(transaction),
+    content: extractContent(transaction)
   }
 }
 
@@ -151,7 +165,7 @@ function extractContent (transaction) {
 }
 
 function isContentChunk (operation) {
-  return (operation.type === "manageData" && operation.name === "Send")
+  return operation.type === "manageData" && operation.name === "Send"
 }
 
 messenger.list = async function (conf, accountId, options) {
@@ -178,6 +192,9 @@ function makeMessageFilter (baseFilter) {
 }
 
 messenger.find = async function (conf, publicKey, func) {
-  const records = await messenger.list(conf, publicKey, { limit: 1, filter: func })
+  const records = await messenger.list(conf, publicKey, {
+    limit: 1,
+    filter: func
+  })
   if (records[0]) return records[0]
 }

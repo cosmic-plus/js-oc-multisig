@@ -11,9 +11,13 @@ shareTransactions.list = async function (conf, account, lastLedger = 0) {
 
   const options = {}
   const legitSources = listSignersKeys(account)
-  options.filter = (record) => isLegitSharedTransaction(record, legitSources)
-  if (lastLedger) options.breaker = (record) => record.ledger_attr <= lastLedger
-  const txRecords = await messenger.listRaw(conf.multisig, conf.multisig.id, options)
+  options.filter = record => isLegitSharedTransaction(record, legitSources)
+  if (lastLedger) options.breaker = record => record.ledger_attr <= lastLedger
+  const txRecords = await messenger.listRaw(
+    conf.multisig,
+    conf.multisig.id,
+    options
+  )
 
   return txRecords.map(decodeTransactionRequest)
 }
@@ -50,7 +54,7 @@ shareTransactions.makePushTx = async function (conf, transaction, senderId) {
 
 async function transactionHasBeenPushed (conf, txHash) {
   const txHash64 = txHash.toString("base64")
-  const tester = (record) => recordHasMemo(record, "hash", txHash64)
+  const tester = record => recordHasMemo(record, "hash", txHash64)
   const record = await messenger.find(conf.multisig, conf.multisig.id, tester)
   return !!record
 }

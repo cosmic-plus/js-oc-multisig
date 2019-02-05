@@ -7,9 +7,7 @@
     "recurse": true,
     "readme": "README.md"
   },
-  "plugins": [
-    "plugins/markdown"
-  ],
+  "plugins": ["plugins/markdown"],
   "template": {
     "default": {
       "includeDate": false

@@ -172,7 +172,10 @@ resolve.accountIsEmpty = async function (conf, id) {
   // const caller = server.accounts()
   // const data = await caller.accountId(account.account_id).call()
   // console.log(data)
-  return resolve.account(conf, id).then(() => false).catch(() => true)
+  return resolve
+    .account(conf, id)
+    .then(() => false)
+    .catch(() => true)
 }
 
 resolve.transaction = async function (conf, txHash) {
@@ -221,7 +224,7 @@ resolve.txSources = function (conf, transaction) {
   const extra = useExtra(transaction)
   if (extra.sources) return extra.sources
 
-  const array = [ transaction.source ]
+  const array = [transaction.source]
 
   for (let index in transaction.operations) {
     const source = transaction.operations[index].source

@@ -19,12 +19,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "get": "git submodule update -i --recursive",
-    "lint": "eslint --fix src/*.js",
-    "build-doc": "jsdoc -c jsdoc.json",
+    "prettier": "prettier --write --no-semi '**.js' 'src/**.js' '**.json' '**.md'",
+    "eslint": "eslint --fix '**.js' 'src/**.js'",
+    "lint": "npm run prettier && npm run eslint",
     "build-misc": "cp -f AUTHORS LICENSE README.md package-lock.json web",
     "build-js": "webpack -p",
     "build": "for i in js misc; do npm run build-$i || return; done",
-    "check": "npm run get && cp web/package-lock.json . && npm ci && npm run build && cd web && git status",
+    "rebuild": "npm run get && cp -f web/package-lock.json . && npm ci && npm run build",
+    "check": "npm run rebuild && cd web && git status",
     "watch": "webpack -d --watch"
   },
   "devDependencies": {
@@ -34,6 +36,7 @@
     "@babel/runtime": "^7.3.1",
     "babel-loader": "^8.0.5",
     "eslint": "^5.12.1",
+    "prettier": "^1.16.4",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1"
   },
