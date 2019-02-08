@@ -1,6 +1,6 @@
 {
   "name": "@cosmic-plus/oc-multisig",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Implements on-chain signature & transaction sharing for Stellar",
   "author": "MisterTicot",
   "repository": "github:cosmic-plus/node-oc-multisig",
