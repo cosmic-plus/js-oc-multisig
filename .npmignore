@@ -1,6 +1,6 @@
-.**
-**.config.js
-jsdoc.json
-test**
+.*
+*.config.js
+
+test
 web
 TODO.md
