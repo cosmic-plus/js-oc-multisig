@@ -9,8 +9,8 @@
  */
 const resolve = exports
 
-const helpers = require("@cosmic-plus/jsutils/misc")
-const StellarSdk = require("@cosmic-plus/base/stellar-sdk")
+const helpers = require("@cosmic-plus/jsutils/es5/misc")
+const StellarSdk = require("@cosmic-plus/base/es5/stellar-sdk")
 
 /**
  *

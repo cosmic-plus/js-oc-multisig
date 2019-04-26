@@ -6,9 +6,9 @@
  */
 const messenger = exports
 
-const Buffer = require("@cosmic-plus/base/buffer")
+const Buffer = require("@cosmic-plus/base/es5/buffer")
 const loopcall = require("@cosmic-plus/loopcall")
-const StellarSdk = require("@cosmic-plus/base/stellar-sdk")
+const StellarSdk = require("@cosmic-plus/base/es5/stellar-sdk")
 
 const resolve = require("./resolve")
 

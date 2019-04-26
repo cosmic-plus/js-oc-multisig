@@ -3,9 +3,9 @@
  */
 const multisig = exports
 
-const axios = require("@cosmic-plus/base/axios")
-const Buffer = require("@cosmic-plus/base/buffer")
-const StellarSdk = require("@cosmic-plus/base/stellar-sdk")
+const axios = require("@cosmic-plus/base/es5/axios")
+const Buffer = require("@cosmic-plus/base/es5/buffer")
+const StellarSdk = require("@cosmic-plus/base/es5/stellar-sdk")
 
 const resolve = require("./resolve")
 const shareSignatures = require("./share-signatures")

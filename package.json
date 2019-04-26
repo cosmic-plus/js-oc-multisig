@@ -41,8 +41,8 @@
     "webpack-cli": "^3.2.3"
   },
   "dependencies": {
-    "@cosmic-plus/base": "^1.3.3",
-    "@cosmic-plus/jsutils": "^1.14.0",
-    "@cosmic-plus/loopcall": "^1.0.5"
+    "@cosmic-plus/base": "^2.0.0",
+    "@cosmic-plus/jsutils": "^2.0.0",
+    "@cosmic-plus/loopcall": "^1.1.0"
   }
 }
