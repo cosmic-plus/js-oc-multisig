@@ -3,7 +3,7 @@ module.exports = function (api) {
 
   return {
     presets: ["@babel/preset-env"],
-    plugins: [["@babel/plugin-transform-runtime", { helpers: false }]],
+    plugins: ["@babel/plugin-transform-runtime"],
     sourceType: "unambiguous"
   }
 }
