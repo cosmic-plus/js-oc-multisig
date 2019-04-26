@@ -1,5 +1,9 @@
-const multisig = require("../src")
+"use_strict"
+
 const StellarSdk = require("@cosmic-plus/base/es5/stellar-sdk")
+const { friendbot } = require("@cosmic-plus/base")
+
+const multisig = require("../src")
 
 /// Please don't mess with those accounts ^^^(*.*)^^^.
 const account1 = StellarSdk.Keypair.fromSecret(
@@ -29,7 +33,17 @@ const transaction3_signed = new StellarSdk.Transaction(
   "AAAAAMg77z7lw5ND+swacBhjC6uGw0qVYfBJ3WwG88aivwJkAAAAZAEmmfQAAAAUAAAAAAAAAAAAAAABAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaK/AmQAAABA7qf0vlz/1mBI37uBGkepCe99e5dIFucjXHIKlWxQsmVo/+7xwTpAylQn0+bsca83XnG/G2IyLNy4KW5sTEPdAQ=="
 )
 
+async function fund () {
+  console.log("Checking that test accounts exists...")
+  await friendbot(account1.publicKey()).catch(() => {})
+  await friendbot(account2.publicKey()).catch(() => {})
+  console.log("Done\n")
+}
+
+
 async function test () {
+  await fund()
+
   console.log("=========== Test Network ===========")
   console.log("")
   multisig.useNetwork("test")

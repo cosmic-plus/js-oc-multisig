@@ -1,5 +1,8 @@
 "use_strict"
+
 global.StellarSdk = require("stellar-sdk")
+const { friendbot } = require("@cosmic-plus/base")
+
 const messenger = require("../src/messenger")
 
 StellarSdk.Network.useTestNetwork()
@@ -24,11 +27,20 @@ Là où tu es.
 
 -- Jacques Prévert`
 
+async function fund () {
+  console.log("Checking that test accounts exists...")
+  await friendbot(keypair.publicKey()).catch(() => {})
+  await friendbot(mailbox).catch(() => {})
+  console.log("Done\n")
+}
+
 async function test () {
+  await fund()
+
   await report(
     "messenger.send(conf, keypair, mailbox, \"Immense et rouge\", poem)"
   )
-  await report("messenger.list(conf, mailbox, { limit: 10})")
+  await report("messenger.list(conf, mailbox, { limit: 10})")
   const records = await messenger.list(conf, mailbox, { order: "desc" })
   console.log(records[0].content.toString())
 }
