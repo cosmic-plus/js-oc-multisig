@@ -165,7 +165,7 @@ multisig.useNetwork = function (conf, network, server) {
 function makeSetupTx (conf, account, options = {}) {
   const multisigId =
     options.id || conf.multisig.id || StellarSdk.Keypair.random().publicKey()
-  const txBuilder = new StellarSdk.TransactionBuilder(account)
+  const txBuilder = new StellarSdk.TransactionBuilder(account, { fee: 100 })
   txBuilder.addMemo(new StellarSdk.Memo("text", "Setup signature sharing"))
 
   let isEmpty = true
@@ -201,7 +201,7 @@ function makeSetupTx (conf, account, options = {}) {
  * Returns the transaction that disable signature sharing for `account`.
  */
 function makeDisableTx (conf, account) {
-  const txBuilder = new StellarSdk.TransactionBuilder(account)
+  const txBuilder = new StellarSdk.TransactionBuilder(account, { fee: 100 })
   txBuilder.addMemo(new StellarSdk.Memo("text", "Disable signature sharing"))
 
   const setData = function (name, value) {

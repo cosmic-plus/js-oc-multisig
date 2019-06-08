@@ -2,25 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.1 - 2019-06-08
+
+### Changed
+
+- Make oc-multisig compatible with [stellar-sdk] 1.0.2 & protocol 11.
+
 ## 0.4.0 - 2019-04-26
 
 ### Added
 
 - Bundle transpiled ES5 code within the package.
 
-## Changed
+### Changed
 
 - Update tests.
 
 ## 0.3.6 - 2019-02-09
-
+d
 ### Security
 
 - Get rid of minor vulnerability from lodash-4.17.0.
 
 ## 0.3.5 - 2019-02-01
 
-## Changed
+### Changed
 
 - Update [stellar-sdk] to 0.12.0.
 

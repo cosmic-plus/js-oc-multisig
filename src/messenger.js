@@ -61,7 +61,9 @@ messenger.encode = async function (
   object,
   content
 ) {
-  const txBuilder = new StellarSdk.TransactionBuilder(senderAccount)
+  const txBuilder = new StellarSdk.TransactionBuilder(senderAccount, {
+    fee: 100
+  })
   addMemo(txBuilder, object)
   await addDestinations(conf, txBuilder, destinations)
   addContent(txBuilder, content)
