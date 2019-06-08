@@ -40,7 +40,6 @@ async function fund () {
   console.log("Done\n")
 }
 
-
 async function test () {
   await fund()
 

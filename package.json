@@ -1,6 +1,6 @@
 {
   "name": "@cosmic-plus/oc-multisig",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Implements on-chain signature & transaction sharing for Stellar",
   "author": "MisterTicot",
   "repository": "github:cosmic-plus/node-oc-multisig",
@@ -31,19 +31,19 @@
     "watch": "npm run build-es5; webpack -d --watch & npm run watch-es5"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.3",
-    "@babel/core": "^7.4.3",
-    "@babel/plugin-transform-runtime": "^7.4.3",
-    "@babel/preset-env": "^7.4.3",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
     "eslint": "^5.16.0",
-    "prettier": "^1.17.0",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.1"
+    "prettier": "^1.18.2",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.3"
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.3",
-    "@cosmic-plus/base": "^2.0.0",
-    "@cosmic-plus/jsutils": "^2.0.0",
+    "@babel/runtime": "^7.4.5",
+    "@cosmic-plus/base": "^2.0.2",
+    "@cosmic-plus/jsutils": "^2.0.1",
     "@cosmic-plus/loopcall": "^1.1.0"
   }
 }
