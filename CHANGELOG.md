@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.2 - 2019-06-22
+
+### Changed
+
+- Update [@cosmic-plus/base] to 2.0.3. (Security fix)
+
 ## 0.4.1 - 2019-06-08
 
 ### Changed
@@ -36,3 +42,4 @@ There is no changelog for older releases. Please look take a look at [commit
 history](https://github.com/cosmic-plus/node-oc-multisig/commits/master).
 
 [stellar-sdk]: https://github.com/stellar/js-stellar-sdk/blob/master/CHANGELOG.md
+[@cosmic-plus/base]: https://github.com/cosmic-plus/node-base/blob/master/CHANGELOG.md
