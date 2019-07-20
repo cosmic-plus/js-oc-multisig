@@ -45,7 +45,7 @@ In your HTML pages:
 
 ```HTML
 <script src="./bower_components/stellar-sdk/stellar-sdk.min.js"></script>
-<script src="./bower_components/cosmic-plus-oc-multisig/multisig.js"></script>
+<script src="./bower_components/cosmic-plus-oc-multisig/oc-multisig.js"></script>
 ```
 
 ### HTML

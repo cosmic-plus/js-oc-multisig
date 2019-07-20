@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 0.4.3 - 2019-07-20
 
 ### Changed
 
@@ -34,7 +34,7 @@ All notable changes to this project will be documented in this file.
 - Update tests.
 
 ## 0.3.6 - 2019-02-09
-d
+
 ### Security
 
 - Get rid of minor vulnerability from lodash-4.17.0.
