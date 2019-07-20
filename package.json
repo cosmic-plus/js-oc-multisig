@@ -3,17 +3,22 @@
   "version": "0.4.2",
   "description": "Implements on-chain signature & transaction sharing for Stellar",
   "author": "MisterTicot",
-  "repository": "github:cosmic-plus/node-oc-multisig",
+  "homepage": "https://cosmic.plus/#view:js-oc-multisig",
+  "repository": "github:cosmic-plus/js-oc-multisig",
   "license": "MIT",
   "main": "src/index.js",
   "keywords": [
-    "blockchain",
     "stellar",
-    "on-chain",
+    "SEP-0021",
     "multisig",
+    "trustless",
+    "on-chain",
     "signature",
+    "collection",
     "transaction",
-    "sharing"
+    "sharing",
+    "browser",
+    "node"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

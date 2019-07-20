@@ -1,5 +1,11 @@
 # @cosmic-plus/oc-multisig
 
+![Licence](https://img.shields.io/github/license/cosmic-plus/js-oc-multisig.svg)
+[![Dependencies](https://david-dm.org/cosmic-plus/js-oc-multisig/status.svg)](https://david-dm.org/cosmic-plus/js-oc-multisig)
+![Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/npm/@cosmic-plus/oc-multisig.svg)
+![Size](https://img.shields.io/bundlephobia/minzip/@cosmic-plus/oc-multisig.svg)
+![Downloads](https://img.shields.io/npm/dt/@cosmic-plus/oc-multisig.svg)
+
 **Stellar On-chain Multisignatures** is a JavaScript library that enable
 storing/retrieving signatures and transactions on the Stellar blockchain.
 
@@ -45,8 +51,8 @@ In your HTML pages:
 ### HTML
 
 ```HTML
-<script src="https://cosmic.plus/stellar-sdk/stellar-sdk.min.js"></script>
-<script src="https://cosmic.plus/web-oc-multisig/multisig.js"></script>
+<script src="https://cdn.cosmic.plus/stellar-sdk"></script>
+<script src="https://cdn.cosmic.plus/oc-multisig@0.x"></script>
 ```
 
 Note: For production release it is advised to serve your own copy of the libraries.
