@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - Switch to new cosmic.plus paths (cdn.cosmic.plus, new repository name).
 - Add badges & keywords.
+- Rename bundle into "oc-multisig.js" for consistency. The old filename is still
+  made available through a symbolic link.
 
 ## 0.4.2 - 2019-06-22
 

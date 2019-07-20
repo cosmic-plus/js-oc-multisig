@@ -2,7 +2,7 @@ module.exports = {
   entry: "./es5/index.js",
   output: {
     path: __dirname + "/web",
-    filename: "multisig.js",
+    filename: "oc-multisig.js",
     library: "multisig",
     libraryTarget: "umd"
   },
