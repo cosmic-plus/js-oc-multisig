@@ -1,6 +1,6 @@
 {
   "name": "@cosmic-plus/oc-multisig",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Implements on-chain signature & transaction sharing for Stellar",
   "author": "MisterTicot",
   "homepage": "https://cosmic.plus/#view:js-oc-multisig",
@@ -25,7 +25,7 @@
     "prettier": "prettier --write --no-semi 'test/*.js' 'src/*.js' '*.js' '*.json' '*.md'",
     "eslint": "eslint --fix 'test/*.js' 'src/*.js' '*.js'",
     "lint": "npm run prettier && npm run eslint",
-    "build-misc": "cp -f AUTHORS LICENSE README.md package-lock.json web",
+    "build-misc": "cp -f *.md package-lock.json web",
     "build-es5": "babel --delete-dir-on-start --out-dir es5 src",
     "build-js": "npm run build-es5 && webpack -p",
     "build": "for i in js misc; do npm run build-$i || return; done",
@@ -52,7 +52,7 @@
     "@babel/preset-env": "^7.5.5",
     "eslint": "^5.16.0",
     "prettier": "^1.18.2",
-    "webpack": "^4.36.1",
+    "webpack": "^4.38.0",
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
