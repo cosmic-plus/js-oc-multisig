@@ -32,7 +32,18 @@
     "rebuild": "npm run get && cp -f web/package-lock.json . && npm ci && npm run build",
     "check": "npm run rebuild && cd web && git status",
     "watch-es5": "babel --watch --out-dir es5 src",
-    "watch": "npm run build-es5; webpack -d --watch & npm run watch-es5"
+    "watch": "npm run build-es5; webpack -d --watch & npm run watch-es5",
+    "commit-web": "cd web && git ci -am \"$message\"",
+    "commit-main": "git ci -am \"$message\"",
+    "commit-all": "[ \"$version\" ] && npm run commit-web && npm run commit-main",
+    "commit-release": "export message=\"Release $version\" && npm run commit-all",
+    "tag-web": "cd web && git tag -s \"$version\" -m \"$message\"",
+    "tag-main": "git tag -s \"$version\" -m \"$message\"",
+    "tag-all": "[ \"$version\" -a \"$message\" ] && npm run tag-web && npm run tag-main",
+    "tag-release": "export version message=\"Release $version\" && npm run tag-all",
+    "push-release": "cd web && git push && git push --tags && cd .. && git push && git push --tags",
+    "make-release": "npm update && npm run build && npm run commit-release",
+    "publish-release": "npm run check && npm run tag-release && npm run push-release && npm publish"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
