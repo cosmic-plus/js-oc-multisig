@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Automate release procedure.
 - Add contributing guidelines.
+- Update depends (bugfixes, [stellar-sdk] 2.1.1).
 
 ## 0.4.3 - 2019-07-20
 
