@@ -7,6 +7,7 @@
   "repository": "github:cosmic-plus/js-oc-multisig",
   "license": "MIT",
   "main": "src/index.js",
+  "module": "es5/index.js",
   "keywords": [
     "stellar",
     "SEP-0021",
