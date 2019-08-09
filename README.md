@@ -1,4 +1,9 @@
-# @cosmic-plus/oc-multisig
+**oc-multisig /**
+[Readme](README.md)
+• [Contributing](CONTRIBUTING.md)
+• [Changelog](CHANGELOG.md)
+
+# Readme
 
 ![Licence](https://img.shields.io/github/license/cosmic-plus/js-oc-multisig.svg)
 [![Dependencies](https://img.shields.io/david/cosmic-plus/js-oc-multisig)](https://david-dm.org/cosmic-plus/js-oc-multisig)
