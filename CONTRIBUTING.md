@@ -1,10 +1,10 @@
-# Contributing Guidelines
+# Contributing
 
 Welcome to new contributors! This project is open to input & edits.
 
 ## Bug Reports & Feature Requests
 
-Please check the [dedicated form](https://github.com/cosmic-plus/js-oc-multisig/issues/new/choose).
+Please use the [dedicated form](https://github.com/cosmic-plus/js-oc-multisig/issues/new/choose).
 
 ## Pull Requests
 
@@ -60,10 +60,8 @@ Those helpers require a POSIX shell.
 
 - `npm run get`: Fetch the `web` sub-repository.
 - `npm run lint`: Lint code.
-- `npm run build`: Build the transpiled code & the browser bundle.
 - `npm run watch`: Automatically transpile & bundle code after each change.
-- `npm run serve`: Run a live server that updates after each change.
+- `npm run build`: Build the production transpiled code & browser bundle.
+- `npm run check`: Check the production browser bundle integrity.
 - `version={semver} npm run make-release`: Build & locally commit release.
 - `version={semver} npm run publish-release`: Check, tag, push & publish release.
-
-
