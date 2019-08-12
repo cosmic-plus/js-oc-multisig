@@ -1,0 +1,9 @@
+name: "Cosmic.plus - oc-multisig"
+url: "https://cosmic.plus/#view:"
+
+include: AUTHORS.md, CONTRIBUTING.md, LICENSE.md
+
+titles_from_heading:
+  enabled:     true
+  strip_title: true
+
