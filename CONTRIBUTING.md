@@ -1,7 +1,7 @@
 **oc-multisig /**
-[Readme](README.md)
-• [Contributing](CONTRIBUTING.md)
-• [Changelog](CHANGELOG.md)
+[Readme](https://cosmic.plus/#view:js-oc-multisig)
+• [Contributing](https://cosmic.plus/#view:js-oc-multisig/CONTRIBUTING)
+• [Changelog](https://cosmic.plus/#view:js-oc-multisig/CHANGELOG)
 
 # Contributing
 

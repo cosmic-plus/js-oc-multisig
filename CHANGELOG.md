@@ -1,11 +1,17 @@
 **oc-multisig /**
-[Readme](README.md)
-• [Contributing](CONTRIBUTING.md)
-• [Changelog](CHANGELOG.md)
+[Readme](https://cosmic.plus/#view:js-oc-multisig)
+• [Contributing](https://cosmic.plus/#view:js-oc-multisig/CONTRIBUTING)
+• [Changelog](https://cosmic.plus/#view:js-oc-multisig/CHANGELOG)
 
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## Unreleased
+
+### Changed
+
+- Documentation: Update navigation header.
 
 ## 0.5.1 - 2019-08-17
 
