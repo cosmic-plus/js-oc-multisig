@@ -1,6 +1,6 @@
 .*
 *.config.js
+_config.yml
 
 test
 web
-TODO.md
