@@ -276,7 +276,10 @@ async function checkAccountExist (conf, accountId) {
  * Else, return `value`.
  */
 async function sendOrReturn (conf, value, keypair) {
-  if (value instanceof StellarSdk.Transaction) {
+  if (
+    value instanceof StellarSdk.Transaction
+    && keypair instanceof StellarSdk.Keypair
+  ) {
     const server = resolve.network(conf)
     value.sign(keypair)
     const responsePromise = server.submitTransaction(value)
