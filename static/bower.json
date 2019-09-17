@@ -24,6 +24,6 @@
     "package-lock.json"
   ],
   "dependencies": {
-    "stellar-sdk": "^2.0.1"
+    "stellar-sdk": "^3.0.0"
   }
 }
