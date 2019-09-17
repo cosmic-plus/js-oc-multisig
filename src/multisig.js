@@ -112,7 +112,7 @@ multisig.pullSignatures = async function (conf, transaction) {
 }
 
 multisig.pushTransaction = async function (conf, transaction, keypair) {
-  const account = await getAccount(conf, keypair)
+  const account = await resolve.account(conf, transaction.source)
   conf.multisig = parseMultisigConfig(account)
 
   if (!conf.multisig.id) {
