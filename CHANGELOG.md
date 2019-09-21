@@ -19,6 +19,25 @@ Versioning](https://semver.org/spec/v2.0.0.html)**. Version syntax is
 backward-compatibility and can be updated to without risk of breakage. For major
 releases, please check this changelog before upgrading.
 
+## 0.6.0 - 2019-09-21
+
+### Changed
+
+- API: Methods can optionally return unsigned tx. For any function that
+  required a keypair, it is possible to pass a public key instead. In that case,
+  the transaction that accomplishes the requested function is returned instead
+  of signed & sent. The point of this is to handle cases where a transaction
+  needs multiple signatures before being broadcasted. _Note: This was the
+  behavior of the first oc-multisig releases, but was disabled at some point to
+  simplify the API. However, this is still required in some cases._
+
+### Fixed
+
+- Logic: Fix a bug in pushTransaction(). There was a mistake in the code that
+  caused signers other than the master key to share transactions with the wrong
+  account.
+- Meta: Update stellar-sdk to 3.x in bower package.
+
 ## 0.5.2 - 2019-08-31
 
 ### Changed
